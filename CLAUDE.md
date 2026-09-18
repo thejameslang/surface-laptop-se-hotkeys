@@ -17,6 +17,13 @@ investigation. Last updated 2026-09-18.
   20.04/22.04/24.04 and RHEL 8.10/9.4, with no Debian. COSMIC is Wayland-only.
   Install the vendors' Ubuntu `.deb` packages and use the Cinnamon X11
   session.
+- Decision (2026-09-18): Mint 22.3 Cinnamon despite the vendor lists. EPA
+  and Citrix Teams optimization also officially list only Ubuntu, but the owner
+  has run Citrix (with EPA) and Horizon on Mint and Pop!_OS without problems,
+  so their employer's EPA policy doesn't check OS identity.
+  Fallback if EPA ever blocks: ask IT about new OS checks, else Ubuntu 24.04
+  LTS with the "Ubuntu on Xorg" session. Avoid Ubuntu 26.04 and Wayland
+  sessions for these apps.
 - Keyboard: plain PS/2, `AT Translated Set 2 keyboard` on i8042. There's no
   Surface Aggregator (SAM), so `surface_aggregator`, `surface_hid` and
   `surface_kbd` are irrelevant. `surface_gpe` logs "no compatible Microsoft
