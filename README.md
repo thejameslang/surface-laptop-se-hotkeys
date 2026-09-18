@@ -87,6 +87,7 @@ sudo rm -rf /usr/src/surface_laptop_se_buttons-0.3
 
 | Path | What it is |
 |---|---|
+| `CLAUDE.md` | Project context and open items for future Claude Code sessions |
 | `dkms/` | Driver source, `Makefile`, `dkms.conf` |
 | `install.sh` | DKMS installer and upgrader |
 | `tools/read-battery-protection.py` | Read-only check of the embedded controller's battery-protection registers (needs sudo) |
