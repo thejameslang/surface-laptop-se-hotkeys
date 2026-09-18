@@ -8,8 +8,15 @@ investigation. Last updated 2026-09-18.
 - Microsoft Surface Laptop SE (Gemini Lake), BIOS 11.6.139.
 - Ran Pop!_OS 24.04 with COSMIC (Wayland) on the stock Pop kernel 7.1.5
   (not linux-surface). Secure Boot was off.
-- The owner is considering Linux Mint or LMDE next. Both work: Mint 22.2/22.3
-  ship kernel 6.14, LMDE 7 ships 6.12. LMDE 6 (kernel 6.1) is too old.
+- Next OS: **Linux Mint 22.3 Cinnamon** (recommended 2026-09-18; kernel 6.14,
+  so the driver works as-is). LMDE 7 (kernel 6.12) would also run the driver,
+  and LMDE 6 (kernel 6.1) is too old.
+- Why Mint: the owner uses **Citrix Workspace** and **Omnissa Horizon** for
+  work. Both vendors test on Ubuntu 24.04 (Mint 22.3's base) and support only
+  **X11, not Wayland**. Citrix lists Debian 11/12 only; Horizon lists Ubuntu
+  20.04/22.04/24.04 and RHEL 8.10/9.4, with no Debian. COSMIC is Wayland-only.
+  Install the vendors' Ubuntu `.deb` packages and use the Cinnamon X11
+  session.
 - Keyboard: plain PS/2, `AT Translated Set 2 keyboard` on i8042. There's no
   Surface Aggregator (SAM), so `surface_aggregator`, `surface_hid` and
   `surface_kbd` are irrelevant. `surface_gpe` logs "no compatible Microsoft
