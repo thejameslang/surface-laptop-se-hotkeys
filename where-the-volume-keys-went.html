@@ -1,0 +1,533 @@
+<title>Where the Volume Keys Went</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --ground: #f2f5f4;
+  --paper: #fbfcfc;
+  --ink: #15201d;
+  --muted: #56645f;
+  --rule: #d3dcd8;
+  --accent: #1d6b57;
+  --accent-soft: #dcebe5;
+  --hex: #a4561a;
+  --bad: #b0322b;
+  --bad-soft: #f5e1de;
+  --code-bg: #e8eeec;
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0e1513; --paper: #141d1a; --ink: #e2e9e6; --muted: #98a8a2; --rule: #2a3733;
+    --accent: #62c3a4; --accent-soft: #183229; --hex: #e3a468; --bad: #f08a80; --bad-soft: #3a1c1a; --code-bg: #18221f;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0e1513; --paper: #141d1a; --ink: #e2e9e6; --muted: #98a8a2; --rule: #2a3733;
+  --accent: #62c3a4; --accent-soft: #183229; --hex: #e3a468; --bad: #f08a80; --bad-soft: #3a1c1a; --code-bg: #18221f;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font: 400 1.075rem/1.65 var(--body);
+  padding-inline: 20px; padding-block: 0 64px;
+}
+.wrap { max-width: 44rem; margin: 0 auto; }
+header { padding-block: 56px 28px; border-bottom: 2px solid var(--ink); }
+.eyebrow {
+  font: 600 .78rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent);
+  display: flex; flex-wrap: wrap; gap: 6px 18px;
+}
+h1 {
+  font-family: var(--display); font-stretch: 78%; font-weight: 800;
+  font-size: clamp(2.4rem, 7vw, 3.9rem); line-height: .98; letter-spacing: -.01em;
+  margin: 18px 0 14px; text-wrap: balance;
+}
+.dek { font-size: 1.22rem; line-height: 1.5; color: var(--muted); margin: 0; max-width: 38rem; text-wrap: pretty; }
+h2 {
+  font-family: var(--display); font-stretch: 85%; font-weight: 700; font-size: 1.6rem; line-height: 1.15;
+  margin: 56px 0 12px; text-wrap: balance; display: flex; gap: 12px; align-items: baseline;
+}
+h2 .step { font: 600 .9rem/1 var(--mono); color: var(--accent); flex: none; }
+h3 { font-family: var(--display); font-stretch: 90%; font-weight: 700; font-size: 1.15rem; margin: 28px 0 6px; }
+p, li { text-wrap: pretty; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code { font: .86em/1.4 var(--mono); background: var(--code-bg); padding: .08em .32em; border-radius: 3px; }
+.hx { color: var(--hex); font-weight: 600; }
+pre {
+  font: .8rem/1.55 var(--mono); background: var(--code-bg); color: var(--ink);
+  padding: 14px 16px; border-radius: 4px; overflow-x: auto; margin: 14px 0 18px;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+pre .c { color: var(--muted); }
+pre .b { color: var(--bad); font-weight: 600; }
+pre .g { color: var(--accent); font-weight: 600; }
+
+.tldr {
+  margin-top: 32px; background: var(--paper); border: 1px solid var(--rule); border-left: 4px solid var(--accent);
+  padding: 18px 22px; border-radius: 0 4px 4px 0;
+}
+.tldr h2 { margin: 0 0 6px; font-size: 1.1rem; }
+.tldr p { margin: 0 0 8px; } .tldr p:last-child { margin: 0; }
+
+.figure { margin: 26px 0 8px; overflow-x: auto; }
+.figure svg { display: block; min-width: 640px; width: 100%; height: auto; }
+.figure svg text { font-family: var(--mono); fill: var(--ink); }
+.figure .box { fill: var(--paper); stroke: var(--rule); stroke-width: 1.5; }
+.figure .dead { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.figure .fixbox { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+.figure .wire { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.figure .wire-fix { stroke: var(--accent); stroke-width: 2; fill: none; }
+.figure .arrow { fill: var(--muted); }
+.figure .arrow-fix { fill: var(--accent); }
+.figure .lbl { font-size: 11px; fill: var(--muted); }
+.figure .sm { font-size: 12px; }
+.figure .hxt { fill: var(--hex); font-weight: 600; }
+.figure .badt { fill: var(--bad); font-weight: 600; }
+.figure .goodt { fill: var(--accent); font-weight: 600; }
+figcaption { font-size: .9rem; color: var(--muted); margin-bottom: 8px; }
+
+.table-wrap { overflow-x: auto; margin: 16px 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 600 .74rem/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom-color: var(--ink); }
+td code { white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; }
+
+.verdict {
+  display: inline-block; font: 600 .72rem/1 var(--mono); letter-spacing: .05em; text-transform: uppercase;
+  padding: 4px 7px; border-radius: 3px; white-space: nowrap;
+}
+.verdict.no { color: var(--bad); background: var(--bad-soft); }
+.verdict.ok { color: var(--accent); background: var(--accent-soft); }
+
+.aside {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 18px; margin: 20px 0;
+  font-size: 1rem;
+}
+.aside strong:first-child { font-family: var(--display); font-stretch: 90%; }
+
+.distros { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 14px; margin: 16px 0; }
+.distro { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; }
+.distro h3 { margin: 0 0 6px; }
+.distro p { margin: 0; font-size: .95rem; }
+
+details { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; margin: 16px 0; }
+summary { cursor: pointer; padding: 12px 16px; font: 600 .9rem/1.3 var(--mono); }
+details pre { margin: 0; border-radius: 0 0 4px 4px; max-height: 32rem; }
+
+ol.steps { padding-left: 1.3rem; } ol.steps li { margin-bottom: 8px; }
+footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: .9rem; color: var(--muted); }
+@media (max-width: 480px) { body { font-size: 1rem; } h2 { font-size: 1.35rem; } }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow"><span>Surface Laptop SE</span><span>Linux</span><span>linux-surface #767</span></div>
+  <h1>Where the Volume Keys Went</h1>
+  <p class="dek">On Linux, the Surface Laptop SE's volume and brightness keys have done nothing since at least 2022. This is how we followed a single keypress through the keyboard controller, the firmware and two kernel drivers, and found where it was being thrown away.</p>
+</header>
+
+<section class="tldr" aria-labelledby="tldr">
+  <h2 id="tldr">The short version</h2>
+  <p>Those keys never reach the keyboard. The embedded controller (EC) turns them into ACPI notifications for a firmware device called <code>BIND</code>, hardware ID <code>MSHW0040</code>. Linux has two drivers that know that ID, and both reject this laptop's version of it. With nothing bound to the device, every volume, brightness and power keypress is silently dropped.</p>
+  <p>The fix is a small kernel driver that binds <code>MSHW0040</code> on this one model and turns the notifications back into key presses. It can be installed today with DKMS, and there's a matching patch for the upstream kernel.</p>
+</section>
+
+<div class="figure" role="img" aria-label="Signal path: a key press goes to the embedded controller, which runs an EC query method that notifies the BIND device. No driver was bound to BIND, so the event was dropped. The new driver binds it and emits KEY_VOLUMEUP.">
+<svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-fix" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>
+  <rect class="box" x="4" y="30" width="120" height="58" rx="4"/>
+  <text x="64" y="55" text-anchor="middle" class="sm">Vol Up key</text>
+  <text x="64" y="74" text-anchor="middle" class="lbl">pressed</text>
+
+  <rect class="box" x="160" y="30" width="130" height="58" rx="4"/>
+  <text x="225" y="55" text-anchor="middle" class="sm">Embedded</text>
+  <text x="225" y="72" text-anchor="middle" class="sm">controller</text>
+
+  <rect class="box" x="326" y="30" width="150" height="58" rx="4"/>
+  <text x="401" y="55" text-anchor="middle" class="sm">EC query <tspan class="hxt">_QD1</tspan></text>
+  <text x="401" y="74" text-anchor="middle" class="lbl">ACPI method, GPE 0x21</text>
+
+  <rect class="box" x="512" y="30" width="204" height="58" rx="4"/>
+  <text x="614" y="55" text-anchor="middle" class="sm">Notify(BIND, <tspan class="hxt">0xC0</tspan>)</text>
+  <text x="614" y="74" text-anchor="middle" class="lbl">\_SB.BIND · MSHW0040</text>
+
+  <path class="wire" d="M124,59 H156" marker-end="url(#ah)"/>
+  <path class="wire" d="M290,59 H322" marker-end="url(#ah)"/>
+  <path class="wire" d="M476,59 H508" marker-end="url(#ah)"/>
+
+  <text x="4" y="16" class="lbl">NOT A KEYBOARD SCANCODE · NO i8042 INTERRUPT</text>
+
+  <path class="wire" d="M560,88 V150 H420" marker-end="url(#ah)"/>
+  <rect class="dead" x="210" y="126" width="206" height="48" rx="4"/>
+  <text x="313" y="147" text-anchor="middle" class="sm badt">before: no driver bound</text>
+  <text x="313" y="164" text-anchor="middle" class="lbl">event silently dropped</text>
+
+  <path class="wire-fix" d="M668,88 V200 H420" marker-end="url(#ahf)"/>
+  <rect class="fixbox" x="210" y="180" width="206" height="44" rx="4"/>
+  <text x="313" y="199" text-anchor="middle" class="sm goodt">after: new driver</text>
+  <text x="313" y="215" text-anchor="middle" class="lbl">KEY_VOLUMEUP → desktop OSD</text>
+</svg>
+</div>
+<figcaption>Following one keypress. The new driver intercepts the event at the last step, where it used to vanish.</figcaption>
+
+<h2><span class="step">01</span>This isn't the hardware we expected</h2>
+<p>The obvious suspects were the linux-surface drivers: <code>surface_aggregator</code>, <code>surface_hid_core</code> and <code>surface_kbd</code>. Most modern Surfaces route their keyboard through the Surface Aggregator Module (SAM). The first look at the input devices showed that the Laptop SE doesn't:</p>
+<pre><code>N: Name="<span class="g">AT Translated Set 2 keyboard</span>"
+P: Phys=isa0060/serio0/input0      <span class="c"># plain PS/2, via the i8042 controller</span>
+
+surface_gpe: <span class="b">no compatible Microsoft Surface device found, exiting</span></code></pre>
+<p>The Laptop SE is a budget Gemini Lake machine. Its keyboard is ordinary PS/2, and there's no SAM at all. The drivers named in the bug report never touch it, so the problem had to be somewhere else.</p>
+
+<h2><span class="step">02</span>Listening to the keys</h2>
+<p>With the keyboard controller's debug logging on (<code>/sys/module/i8042/parameters/debug</code>), we recorded every input device with <code>evtest</code>, plus <code>acpi_listen</code> and the kernel log, and pressed each key in turn.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Key</th><th>What the kernel saw</th></tr></thead>
+  <tbody>
+    <tr><td>Mute</td><td>scancode <code class="hx">e0 20</code> → <code>KEY_MUTE</code> (already worked)</td></tr>
+    <tr><td>Play/Pause</td><td>scancode <code class="hx">e0 22</code> → <code>KEY_PLAYPAUSE</code></td></tr>
+    <tr><td>Fn + those keys</td><td>plain <code>F2</code>, <code>F3</code>, <code>F4</code>, <code>F6</code>, <code>F7</code></td></tr>
+    <tr><td>Volume ±, Brightness ±</td><td><strong>nothing at all</strong>: no event and no i8042 interrupt</td></tr>
+  </tbody>
+</table></div>
+<p>That last row rules out the usual fix. Normally an unknown key logs <code>atkbd: Unknown key pressed</code>, and a one-line udev <em>hwdb</em> rule maps it to the right key code. Here the keyboard controller never hears the keypress, so there's nothing to remap. The key has to be reaching the system some other way.</p>
+
+<h2><span class="step">03</span>Reading the firmware</h2>
+<p>The other way in is ACPI, the firmware's description of the hardware. We dumped the tables with <code>acpidump</code> and decompiled them with <code>iasl -d</code>. In the embedded controller's section of the DSDT is a row of <em>EC query methods</em>: small routines the EC triggers by number.</p>
+<pre><code>Method (<span class="hx">_QD1</span>, 0, NotSerialized)
+{
+    P80H = 0xD1
+    Notify (<span class="g">BIND</span>, <span class="hx">0xC0</span>)   <span class="c">// Hardware-Specific</span>
+}
+<span class="c">…  _QD1–_QD6 → BIND 0xC0–0xC3, 0xC6, 0xC7
+   _Q16/_Q17 → BIND 0xCA/0xCB   _Q1B/_Q1C → BIND 0xCC/0xCD</span></code></pre>
+<p><code>0xC0</code>–<code>0xC7</code> is the event-code scheme Microsoft used for the Surface Pro 4's hardware buttons. The device receiving them looked familiar:</p>
+<pre><code>Device (BIND)
+{
+    Name (_HID, "<span class="g">MSHW0040</span>")
+    Method (_DSM, 4, Serialized)   <span class="c">// UUID 6fd05c69-cde3-49f4-95ed-ab1665498035</span>
+    {  …  Case (0x02) { Return (<span class="hx">0x4E</span>) }  …  }   <span class="c">// "OEM platform revision"</span>
+}</code></pre>
+<p>Linux knows <code>MSHW0040</code>. Yet <code>/sys/bus/acpi/devices/MSHW0040:00</code> showed <strong>no driver bound</strong>, even though both drivers that claim that ID were loaded.</p>
+
+<h2><span class="step">04</span>Why nobody was listening</h2>
+<p>Microsoft reused <code>MSHW0040</code> across generations with two different designs. On the Pro 4 and Book 1, buttons arrive as notifications like these. On the Pro 5 and later, they're wired to GPIO pins. The kernel tells the two apart with the <code>_DSM</code> "OEM platform revision": 0 means the notification design, anything else means GPIO. The Laptop SE breaks that rule: it uses notifications but reports revision <code class="hx">0x4E</code>.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Driver</th><th>What it requires</th><th>Laptop SE</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td><code>surfacepro3_button</code></td><td>object named <code>VGBI</code>, and OEM revision = 0</td><td>named <code>BIND</code>, revision <code class="hx">0x4E</code></td><td><span class="verdict no">rejects</span></td></tr>
+    <tr><td><code>soc_button_array</code></td><td>OEM revision ≠ 0, and GPIO resources</td><td>revision passes, but no <code>_CRS</code>/GPIOs</td><td><span class="verdict no">rejects</span></td></tr>
+  </tbody>
+</table></div>
+<p>Each driver correctly decides the device isn't one of its own, so it ends up with neither. ACPI notifications for a device with no driver are dropped without a log message, which is why nothing ever showed up in <code>acpi_listen</code>. The power button turned out to be affected too:</p>
+<pre><code>ACPI Error: No installed handler for fixed event - PowerButton (2), disabling</code></pre>
+
+<h2><span class="step">05</span>Proving which key fires which event</h2>
+<p>The DSDT showed which notifications exist, but not which key sends which. To find out, we turned on the kernel's embedded-controller debug messages. These log every query the EC raises:</p>
+<pre><code>echo 'file drivers/acpi/ec.c +p' | sudo tee /proc/dynamic_debug/control</code></pre>
+<p>Then we pressed each key a <em>different number of times</em>: Brightness Down once, Brightness Up twice, Volume Down three times, Volume Up four times. Each query number in the log appeared exactly as many times as its key was pressed, so the mapping reads straight off the counts.</p>
+<pre><code>[5809.00] ACPI: EC: Query(<span class="hx">0x1b</span>) started   <span class="c">← Brightness Down ×1</span>
+[5809.16] ACPI: EC: Query(<span class="hx">0x1c</span>) started   <span class="c">  (release)</span>
+[5812.62] ACPI: EC: Query(<span class="hx">0x16</span>) started   <span class="c">← Brightness Up ×2</span>
+…
+[5821.43] ACPI: EC: Query(<span class="hx">0xd1</span>) started   <span class="c">← Volume Up ×4</span></code></pre>
+<div class="table-wrap"><table>
+  <thead><tr><th>Key</th><th>EC queries</th><th>Notify code (press / release)</th></tr></thead>
+  <tbody>
+    <tr><td>Volume Up</td><td><code class="hx">_QD1</code> / <code class="hx">_QD2</code></td><td><code>0xC0</code> / <code>0xC1</code></td></tr>
+    <tr><td>Volume Down</td><td><code class="hx">_QD3</code> / <code class="hx">_QD4</code></td><td><code>0xC2</code> / <code>0xC3</code></td></tr>
+    <tr><td>Power</td><td><code class="hx">_QD5</code> / <code class="hx">_QD6</code></td><td><code>0xC6</code> / <code>0xC7</code></td></tr>
+    <tr><td>Brightness Up</td><td><code class="hx">_Q16</code> / <code class="hx">_Q17</code></td><td><code>0xCA</code> / <code>0xCB</code> (new)</td></tr>
+    <tr><td>Brightness Down</td><td><code class="hx">_Q1B</code> / <code class="hx">_Q1C</code></td><td><code>0xCC</code> / <code>0xCD</code> (new)</td></tr>
+  </tbody>
+</table></div>
+<p>The volume and power codes are the same ones <code>surfacepro3_button</code> already handles for the Pro 4. The two brightness pairs are new, and no existing driver knows them.</p>
+
+<h2><span class="step">06</span>The fix</h2>
+<p>The fix is a small platform driver (under 200 lines), <code>surface_laptop_se_buttons</code>. It binds <code>MSHW0040</code> only when DMI identifies the machine as a Surface Laptop SE, installs an ACPI notify handler, and translates the codes into standard key events. The core of it:</p>
+<pre><code>static void slse_notify(acpi_handle handle, u32 event, void *data)
+{
+	…
+	bool pressed = !(event &amp; 1);	<span class="c">/* even = press, odd = release */</span>
+
+	switch (event) {
+	case <span class="hx">0xc0</span>: case <span class="hx">0xc1</span>: key_code = KEY_VOLUMEUP;       break;
+	case <span class="hx">0xc2</span>: case <span class="hx">0xc3</span>: key_code = KEY_VOLUMEDOWN;     break;
+	case <span class="hx">0xc6</span>: case <span class="hx">0xc7</span>: key_code = KEY_POWER;          break;
+	case <span class="hx">0xca</span>: case <span class="hx">0xcb</span>: key_code = KEY_BRIGHTNESSUP;   break;
+	case <span class="hx">0xcc</span>: case <span class="hx">0xcd</span>: key_code = KEY_BRIGHTNESSDOWN; break;
+	…</code></pre>
+<p>Loaded with <code>insmod</code>, it bound immediately (<code>surface_laptop_se_buttons MSHW0040:00: Surface Laptop SE buttons [BIND]</code>). evtest showed a clean press and release for every key, and the desktop's volume and brightness indicators appeared. The full source is further down.</p>
+
+<h2><span class="step">07</span>Two loose ends</h2>
+<h3>The Search key</h3>
+<p>Search already worked at the kernel level. It sends scancode <code class="hx">e0 65</code>, which Linux reports as <code>KEY_SEARCH</code>. The desktop just had nothing bound to it. On COSMIC, a custom shortcut fixes it: <code>XF86Search</code> → Launcher. On GNOME, KDE and others, bind it in the keyboard shortcut settings.</p>
+<h3>Holding a key doesn't repeat</h3>
+<p>Holding Volume Up raised the volume by one step and stopped. The first guess was that the driver needed kernel key repeat (<code>EV_REP</code>). The kernel did start repeating, about every 34 ms, with 160 repeat events during one hold, but nothing changed on screen. The EC trace showed it reports a real hold (press, then release 2.5 s later), so the problem wasn't the hardware either. On Wayland the compositor decides whether a held key repeats, and libinput deliberately discards the kernel's repeat events. COSMIC doesn't repeat volume or brightness shortcuts on <em>any</em> keyboard; this is an open issue, <a href="https://github.com/pop-os/cosmic-epoch/issues/384">cosmic-epoch#384</a>. The lesson: measure every layer before you blame one. The upstream patch was kept simple as a result.</p>
+
+<h2><span class="step">08</span>Installing it</h2>
+<p>The driver has no distro-specific code. What matters is the kernel version and whether Secure Boot is on.</p>
+<ul>
+  <li><strong>Kernel 6.11 or newer:</strong> works as-is. It was built and tested on 7.1.5.</li>
+  <li><strong>Kernel 6.7–6.10:</strong> covered by a compatibility fallback in the source, but not yet tested on those kernels.</li>
+  <li><strong>Older than 6.7:</strong> not supported.</li>
+</ul>
+<pre><code>sudo mkdir -p /usr/src/surface_laptop_se_buttons-0.3
+<span class="c"># copy surface_laptop_se_buttons.c, Makefile and dkms.conf (below) into that directory</span>
+sudo dkms install -m surface_laptop_se_buttons -v 0.3
+sudo modprobe surface_laptop_se_buttons</code></pre>
+<p>DKMS rebuilds the module automatically on every kernel update, and it loads at boot because it matches the ACPI device ID.</p>
+<div class="distros">
+  <div class="distro"><h3>Pop!_OS, Ubuntu, Mint</h3><p><code>sudo apt install dkms linux-headers-$(uname -r)</code>. Mint 22.2 and 22.3 ship kernel 6.14, which works as-is.</p></div>
+  <div class="distro"><h3>LMDE 7, Debian 13</h3><p><code>sudo apt install dkms linux-headers-$(uname -r)</code>. LMDE 7 ships kernel 6.12, which works as-is. LMDE 6 and Debian 12 (kernel 6.1) are too old unless you install a newer kernel from backports.</p></div>
+  <div class="distro"><h3>Fedora</h3><p><code>sudo dnf install dkms kernel-devel</code></p></div>
+  <div class="distro"><h3>Arch</h3><p><code>sudo pacman -S dkms linux-headers</code>. The linux-surface kernel works too; its <code>MSHW0040</code> drivers reject this device in the same way.</p></div>
+</div>
+
+<h3>With Secure Boot on</h3>
+<p>Secure Boot only loads kernel modules signed by a key the firmware trusts. You need to enrol a <em>Machine Owner Key</em> (MOK) once, and after that DKMS signs every rebuild automatically. The only difference between distro families is where DKMS keeps the key:</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Distro family</th><th>Public key to enrol</th><th>Prompts you during install?</th></tr></thead>
+  <tbody>
+    <tr><td>Ubuntu, Pop!_OS, Mint</td><td><code>/var/lib/shim-signed/mok/MOK.der</code></td><td>usually</td></tr>
+    <tr><td>Debian, LMDE</td><td><code>/var/lib/dkms/mok.pub</code></td><td>no, so always do step 2</td></tr>
+  </tbody>
+</table></div>
+<ol class="steps">
+  <li>Install the module as above. DKMS creates a signing key and signs the module with it. On Ubuntu-based systems, if the installer prompts you for a password, choose one and skip step 2.</li>
+  <li>Otherwise, request enrollment yourself: <code>sudo mokutil --import &lt;key from the table&gt;</code> (for example <code>/var/lib/dkms/mok.pub</code> on LMDE), and choose a one-time password.</li>
+  <li>Reboot. A blue <strong>MOK Manager</strong> screen appears before Linux starts. Choose <em>Enroll MOK → Continue → Yes</em> and enter that password.</li>
+  <li>Check it with <code>mokutil --list-enrolled</code>, then <code>sudo modprobe surface_laptop_se_buttons</code>.</li>
+</ol>
+<p>You do this once. Kernel updates are signed with the same key. Immutable distros (Silverblue, Bazzite, SteamOS) make adding kernel modules hard; they'll have to wait for the upstream fix.</p>
+
+<h2><span class="step">09</span>Getting it upstream</h2>
+<p>Once a fix is in the mainline kernel, every distro gets it automatically, with no DKMS and no signing. A patch has been prepared that teaches the existing <code>surfacepro3_button</code> driver about the Laptop SE: it recognises the <code>BIND</code> object on this model by DMI, skips the VGBI/revision checks for it, and adds the brightness codes. It compiles against 7.1 and passes <code>checkpatch.pl</code> with 0 errors and 0 warnings. It hasn't been sent to the maintainers or the <code>platform-driver-x86</code> list yet.</p>
+
+<h2><span class="step">10</span>The toolbox</h2>
+<p>None of this is specific to Surface hardware. If a hotkey on any laptop does nothing, these checks find out where it disappears.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Question</th><th>Tool</th></tr></thead>
+  <tbody>
+    <tr><td>Does the key produce an input event?</td><td><code>sudo evtest</code></td></tr>
+    <tr><td>Does the keyboard controller see anything?</td><td><code>echo 1 &gt; /sys/module/i8042/parameters/debug</code>, then read <code>dmesg</code></td></tr>
+    <tr><td>Is it an unmapped scancode?</td><td>look for <code>atkbd: Unknown key pressed</code> in dmesg (fixed with a udev hwdb rule)</td></tr>
+    <tr><td>Does it raise an EC query?</td><td><code>echo 'file drivers/acpi/ec.c +p' &gt; /proc/dynamic_debug/control</code></td></tr>
+    <tr><td>What does the firmware do with it?</td><td><code>acpidump</code>, <code>acpixtract -a</code>, <code>iasl -d</code>, then grep for <code>_Qxx</code> and <code>Notify</code></td></tr>
+    <tr><td>Is a driver bound to that device?</td><td><code>readlink /sys/bus/acpi/devices/&lt;ID&gt;/physical_node/driver</code></td></tr>
+    <tr><td>Why did the driver reject it?</td><td>read the driver's <code>probe()</code> function in the kernel source</td></tr>
+  </tbody>
+</table></div>
+<div class="aside"><strong>A privacy note.</strong> <code>i8042.unmask_kbd_data</code> writes every raw keystroke to the kernel log, and that includes passwords. Turn it on for a few seconds at most, press only the key you're testing, and turn it off again.</div>
+
+<h2 id="source">The driver source</h2>
+<details>
+  <summary>surface_laptop_se_buttons.c</summary>
+  <pre><code>// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Hotkey support for the Microsoft Surface Laptop SE.
+ *
+ * The EC reports volume, brightness and power keys as ACPI notifications on
+ * \_SB.BIND (MSHW0040). This device has neither the &quot;VGBI&quot; name nor the zero
+ * OEM platform revision that surfacepro3_button requires, and it has no GPIOs
+ * for soc_button_array, so without this driver the events are dropped.
+ *
+ * See https://github.com/linux-surface/linux-surface/issues/767
+ */
+
+#include &lt;linux/acpi.h&gt;
+#include &lt;linux/dmi.h&gt;
+#include &lt;linux/input.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/platform_device.h&gt;
+#include &lt;linux/version.h&gt;
+
+#define SLSE_NOTIFY_PRESS_VOLUME_UP		0xc0
+#define SLSE_NOTIFY_RELEASE_VOLUME_UP		0xc1
+#define SLSE_NOTIFY_PRESS_VOLUME_DOWN		0xc2
+#define SLSE_NOTIFY_RELEASE_VOLUME_DOWN		0xc3
+#define SLSE_NOTIFY_PRESS_POWER			0xc6
+#define SLSE_NOTIFY_RELEASE_POWER		0xc7
+#define SLSE_NOTIFY_PRESS_BRIGHTNESS_UP		0xca
+#define SLSE_NOTIFY_RELEASE_BRIGHTNESS_UP	0xcb
+#define SLSE_NOTIFY_PRESS_BRIGHTNESS_DOWN	0xcc
+#define SLSE_NOTIFY_RELEASE_BRIGHTNESS_DOWN	0xcd
+
+static const struct dmi_system_id slse_dmi_table[] = {
+	{
+		.matches = {
+			DMI_EXACT_MATCH(DMI_SYS_VENDOR, &quot;Microsoft Corporation&quot;),
+			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, &quot;Surface Laptop SE&quot;),
+		},
+	},
+	{ }
+};
+
+/*
+ * The EC only sends one press and one release per keystroke, so the hotkeys
+ * rely on software autorepeat. The power key lives on a separate input device
+ * without autorepeat, as logind acts on every repeat event of KEY_POWER.
+ */
+struct slse_buttons {
+	struct input_dev *hotkeys;
+	struct input_dev *power;
+};
+
+static void slse_notify(acpi_handle handle, u32 event, void *data)
+{
+	struct device *dev = data;
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+	struct input_dev *input = buttons-&gt;hotkeys;
+	unsigned int key_code;
+	bool pressed = !(event &amp; 1);	/* even = press, odd = release */
+
+	switch (event) {
+	case SLSE_NOTIFY_PRESS_VOLUME_UP:
+	case SLSE_NOTIFY_RELEASE_VOLUME_UP:
+		key_code = KEY_VOLUMEUP;
+		break;
+	case SLSE_NOTIFY_PRESS_VOLUME_DOWN:
+	case SLSE_NOTIFY_RELEASE_VOLUME_DOWN:
+		key_code = KEY_VOLUMEDOWN;
+		break;
+	case SLSE_NOTIFY_PRESS_POWER:
+	case SLSE_NOTIFY_RELEASE_POWER:
+		key_code = KEY_POWER;
+		input = buttons-&gt;power;
+		break;
+	case SLSE_NOTIFY_PRESS_BRIGHTNESS_UP:
+	case SLSE_NOTIFY_RELEASE_BRIGHTNESS_UP:
+		key_code = KEY_BRIGHTNESSUP;
+		break;
+	case SLSE_NOTIFY_PRESS_BRIGHTNESS_DOWN:
+	case SLSE_NOTIFY_RELEASE_BRIGHTNESS_DOWN:
+		key_code = KEY_BRIGHTNESSDOWN;
+		break;
+	default:
+		dev_info_ratelimited(dev, &quot;Unsupported event [0x%x]\n&quot;, event);
+		return;
+	}
+
+	if (pressed &amp;&amp; key_code == KEY_POWER)
+		pm_wakeup_dev_event(dev, 0, true);
+
+	input_report_key(input, key_code, pressed);
+	input_sync(input);
+}
+
+static int slse_probe(struct platform_device *pdev)
+{
+	struct acpi_device *adev = ACPI_COMPANION(&amp;pdev-&gt;dev);
+	struct slse_buttons *buttons;
+	struct input_dev *input;
+	int error;
+
+	if (!adev || !dmi_check_system(slse_dmi_table))
+		return -ENODEV;
+
+	buttons = devm_kzalloc(&amp;pdev-&gt;dev, sizeof(*buttons), GFP_KERNEL);
+	if (!buttons)
+		return -ENOMEM;
+
+	input = devm_input_allocate_device(&amp;pdev-&gt;dev);
+	if (!input)
+		return -ENOMEM;
+
+	input-&gt;name = &quot;Surface Laptop SE Buttons&quot;;
+	input-&gt;phys = &quot;MSHW0040/buttons&quot;;
+	input-&gt;id.bustype = BUS_HOST;
+	__set_bit(EV_REP, input-&gt;evbit);
+	input_set_capability(input, EV_KEY, KEY_VOLUMEUP);
+	input_set_capability(input, EV_KEY, KEY_VOLUMEDOWN);
+	input_set_capability(input, EV_KEY, KEY_BRIGHTNESSUP);
+	input_set_capability(input, EV_KEY, KEY_BRIGHTNESSDOWN);
+
+	error = input_register_device(input);
+	if (error)
+		return error;
+	buttons-&gt;hotkeys = input;
+
+	input = devm_input_allocate_device(&amp;pdev-&gt;dev);
+	if (!input)
+		return -ENOMEM;
+
+	input-&gt;name = &quot;Surface Laptop SE Power Button&quot;;
+	input-&gt;phys = &quot;MSHW0040/power&quot;;
+	input-&gt;id.bustype = BUS_HOST;
+	input_set_capability(input, EV_KEY, KEY_POWER);
+
+	error = input_register_device(input);
+	if (error)
+		return error;
+	buttons-&gt;power = input;
+
+	platform_set_drvdata(pdev, buttons);
+	device_init_wakeup(&amp;pdev-&gt;dev, true);
+
+	error = acpi_dev_install_notify_handler(adev, ACPI_DEVICE_NOTIFY,
+						slse_notify, &amp;pdev-&gt;dev);
+	if (error) {
+		device_init_wakeup(&amp;pdev-&gt;dev, false);
+		return error;
+	}
+
+	dev_info(&amp;pdev-&gt;dev, &quot;Surface Laptop SE buttons [%s]\n&quot;,
+		 acpi_device_bid(adev));
+	return 0;
+}
+
+static void slse_remove(struct platform_device *pdev)
+{
+	acpi_dev_remove_notify_handler(ACPI_COMPANION(&amp;pdev-&gt;dev),
+				       ACPI_DEVICE_NOTIFY, slse_notify);
+	device_init_wakeup(&amp;pdev-&gt;dev, false);
+}
+
+static const struct acpi_device_id slse_acpi_ids[] = {
+	{ &quot;MSHW0040&quot;, 0 },
+	{ }
+};
+MODULE_DEVICE_TABLE(acpi, slse_acpi_ids);
+
+static struct platform_driver slse_driver = {
+	.probe = slse_probe,
+#if LINUX_VERSION_CODE &lt; KERNEL_VERSION(6, 11, 0)
+	.remove_new = slse_remove,
+#else
+	.remove = slse_remove,
+#endif
+	.driver = {
+		.name = &quot;surface_laptop_se_buttons&quot;,
+		.acpi_match_table = slse_acpi_ids,
+	},
+};
+module_platform_driver(slse_driver);
+
+MODULE_DESCRIPTION(&quot;Surface Laptop SE hotkey driver&quot;);
+MODULE_LICENSE(&quot;GPL&quot;);</code></pre>
+</details>
+<details>
+  <summary>Makefile and dkms.conf</summary>
+  <pre><code>obj-m += surface_laptop_se_buttons.o
+<span class="c"># ---- dkms.conf ----</span>
+PACKAGE_NAME=&quot;surface_laptop_se_buttons&quot;
+PACKAGE_VERSION=&quot;0.3&quot;
+BUILT_MODULE_NAME[0]=&quot;surface_laptop_se_buttons&quot;
+DEST_MODULE_LOCATION[0]=&quot;/updates/dkms&quot;
+MAKE[0]=&quot;make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build modules&quot;
+CLEAN=&quot;make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build clean&quot;
+AUTOINSTALL=&quot;yes&quot;</code></pre>
+</details>
+
+<footer>
+  <p>Investigated on a Surface Laptop SE (BIOS 11.6.139) running Pop!_OS with kernel 7.1.5, September 2026, with Claude Code. Upstream bug report: <a href="https://github.com/linux-surface/linux-surface/issues/767">linux-surface/linux-surface#767</a>.</p>
+</footer>
+</div>

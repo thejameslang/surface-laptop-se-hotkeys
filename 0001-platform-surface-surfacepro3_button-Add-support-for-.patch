@@ -1,0 +1,147 @@
+From c60f6cd76fdbf9c912a08f2ada5ac8469d175c75 Mon Sep 17 00:00:00 2001
+From: YOUR NAME <thejameslang@gmail.com>
+Date: Thu, 17 Sep 2026 22:42:33 -0500
+Subject: [PATCH] platform/surface: surfacepro3_button: Add support for Surface
+ Laptop SE
+
+On the Surface Laptop SE the EC reports the power, volume and brightness
+keys as ACPI notifications on \_SB.BIND (MSHW0040), using the same event
+codes as the Surface Pro 4 plus two new pairs for brightness:
+
+  0xc0/0xc1  volume up        press/release
+  0xc2/0xc3  volume down      press/release
+  0xc6/0xc7  power            press/release
+  0xca/0xcb  brightness up    press/release
+  0xcc/0xcd  brightness down  press/release
+
+The device is currently not bound by any driver. surfacepro3_button
+rejects it because the ACPI object is not named VGBI and its _DSM reports
+a nonzero OEM Platform Revision (0x4e), and soc_button_array rejects it
+because it has no GPIO resources. As a result these keys do not work and
+the power button fixed event is disabled as unhandled.
+
+Identify the Laptop SE by DMI and the BIND object name, skip the
+VGBI/OEM Platform Revision checks for it, and map the brightness events
+to KEY_BRIGHTNESSUP/KEY_BRIGHTNESSDOWN.
+
+Link: https://github.com/linux-surface/linux-surface/issues/767
+Assisted-by: Claude:claude-opus-5
+Signed-off-by: YOUR NAME <thejameslang@gmail.com>
+---
+ drivers/platform/surface/surfacepro3_button.c | 58 +++++++++++++++++--
+ 1 file changed, 53 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/platform/surface/surfacepro3_button.c b/drivers/platform/surface/surfacepro3_button.c
+index 388a3e1..65927e0 100644
+--- a/drivers/platform/surface/surfacepro3_button.c
++++ b/drivers/platform/surface/surfacepro3_button.c
+@@ -14,12 +14,14 @@
+ #include <linux/types.h>
+ #include <linux/input.h>
+ #include <linux/acpi.h>
++#include <linux/dmi.h>
+ #include <linux/platform_device.h>
+ #include <acpi/button.h>
+ 
+ #define SURFACE_PRO3_BUTTON_HID		"MSHW0028"
+ #define SURFACE_PRO4_BUTTON_HID		"MSHW0040"
+ #define SURFACE_BUTTON_OBJ_NAME		"VGBI"
++#define SURFACE_LAPTOP_SE_BUTTON_OBJ_NAME	"BIND"
+ #define SURFACE_BUTTON_DEVICE_NAME	"Surface Pro 3/4 Buttons"
+ 
+ #define MSHW0040_DSM_REVISION		0x01
+@@ -42,6 +44,12 @@ static const guid_t MSHW0040_DSM_UUID =
+ #define SURFACE_BUTTON_NOTIFY_PRESS_VOLUME_DOWN		0xc2
+ #define SURFACE_BUTTON_NOTIFY_RELEASE_VOLUME_DOWN	0xc3
+ 
++#define SURFACE_BUTTON_NOTIFY_PRESS_BRIGHTNESS_UP	0xca
++#define SURFACE_BUTTON_NOTIFY_RELEASE_BRIGHTNESS_UP	0xcb
++
++#define SURFACE_BUTTON_NOTIFY_PRESS_BRIGHTNESS_DOWN	0xcc
++#define SURFACE_BUTTON_NOTIFY_RELEASE_BRIGHTNESS_DOWN	0xcd
++
+ MODULE_AUTHOR("Chen Yu");
+ MODULE_DESCRIPTION("Surface Pro3 Button Driver");
+ MODULE_LICENSE("GPL v2");
+@@ -110,6 +118,20 @@ static void surface_button_notify(acpi_handle handle, u32 event, void *data)
+ 	case SURFACE_BUTTON_NOTIFY_RELEASE_VOLUME_DOWN:
+ 		key_code = KEY_VOLUMEDOWN;
+ 		break;
++	/* Brightness up button press,release handle */
++	case SURFACE_BUTTON_NOTIFY_PRESS_BRIGHTNESS_UP:
++		pressed = true;
++		fallthrough;
++	case SURFACE_BUTTON_NOTIFY_RELEASE_BRIGHTNESS_UP:
++		key_code = KEY_BRIGHTNESSUP;
++		break;
++	/* Brightness down button press,release handle */
++	case SURFACE_BUTTON_NOTIFY_PRESS_BRIGHTNESS_DOWN:
++		pressed = true;
++		fallthrough;
++	case SURFACE_BUTTON_NOTIFY_RELEASE_BRIGHTNESS_DOWN:
++		key_code = KEY_BRIGHTNESSDOWN;
++		break;
+ 	case SURFACE_BUTTON_NOTIFY_TABLET_MODE:
+ 		dev_warn_once(dev, "Tablet mode is not supported\n");
+ 		break;
+@@ -146,6 +168,28 @@ static int surface_button_resume(struct device *dev)
+ }
+ #endif
+ 
++/*
++ * The Surface Laptop SE dispatches its EC hotkeys (power, volume, brightness)
++ * as notifications on \_SB.BIND (MSHW0040). Its _DSM reports a nonzero OEM
++ * Platform Revision like the newer GPIO based devices, but it has no GPIOs
++ * for soc_button_array, so it has to be handled here.
++ */
++static const struct dmi_system_id surface_button_laptop_se_dmi_table[] = {
++	{
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
++			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Surface Laptop SE"),
++		},
++	},
++	{ }
++};
++
++static bool surface_button_is_laptop_se(struct acpi_device *device)
++{
++	return dmi_check_system(surface_button_laptop_se_dmi_table) &&
++	       !strcmp(acpi_device_bid(device), SURFACE_LAPTOP_SE_BUTTON_OBJ_NAME);
++}
++
+ /*
+  * Surface Pro 4 and Surface Book 2 / Surface Pro 2017 use the same device
+  * ID (MSHW0040) for the power/volume buttons. Make sure this is the right
+@@ -194,12 +238,14 @@ static int surface_button_probe(struct platform_device *pdev)
+ 	if (!device)
+ 		return -ENODEV;
+ 
+-	if (strncmp(acpi_device_bid(device), SURFACE_BUTTON_OBJ_NAME,
+-	    strlen(SURFACE_BUTTON_OBJ_NAME)))
+-		return -ENODEV;
++	if (!surface_button_is_laptop_se(device)) {
++		if (strncmp(acpi_device_bid(device), SURFACE_BUTTON_OBJ_NAME,
++			    strlen(SURFACE_BUTTON_OBJ_NAME)))
++			return -ENODEV;
+ 
+-	if (!surface_button_check_MSHW0040(&pdev->dev, device->handle))
+-		return -ENODEV;
++		if (!surface_button_check_MSHW0040(&pdev->dev, device->handle))
++			return -ENODEV;
++	}
+ 
+ 	button = kzalloc_obj(struct surface_button);
+ 	if (!button)
+@@ -224,6 +270,8 @@ static int surface_button_probe(struct platform_device *pdev)
+ 	input_set_capability(input, EV_KEY, KEY_LEFTMETA);
+ 	input_set_capability(input, EV_KEY, KEY_VOLUMEUP);
+ 	input_set_capability(input, EV_KEY, KEY_VOLUMEDOWN);
++	input_set_capability(input, EV_KEY, KEY_BRIGHTNESSUP);
++	input_set_capability(input, EV_KEY, KEY_BRIGHTNESSDOWN);
+ 
+ 	error = input_register_device(input);
+ 	if (error)
+-- 
+2.43.0
+
