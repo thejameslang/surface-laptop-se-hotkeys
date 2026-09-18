@@ -6,3 +6,4 @@
 .*.cmd
 Module.symvers
 modules.order
+__pycache__/

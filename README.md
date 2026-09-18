@@ -77,12 +77,20 @@ sudo rm -rf /usr/src/surface_laptop_se_buttons-0.3
   ([cosmic-epoch#384](https://github.com/pop-os/cosmic-epoch/issues/384)),
   not this driver.
 
+- **No charge limit setting.** The firmware has no charge threshold that
+  Linux can set, so desktop settings like Pop!_OS's 80% limit don't appear.
+  The embedded controller has a built-in battery protection policy (`0x10`, set
+  at boot), but the OS can only read its state or turn it off. In testing it
+  didn't engage after a night plugged in. Check it with
+  `sudo python3 tools/read-battery-protection.py`.
+
 ## Files
 
 | Path | What it is |
 |---|---|
 | `dkms/` | Driver source, `Makefile`, `dkms.conf` |
 | `install.sh` | DKMS installer and upgrader |
+| `tools/read-battery-protection.py` | Read-only check of the embedded controller's battery-protection registers (needs sudo) |
 | `0001-platform-surface-surfacepro3_button-Add-support-for-.patch` | Upstream kernel patch that adds Laptop SE support to `surfacepro3_button`. Passes `checkpatch.pl`; not yet sent. |
 | `github-issue-767-comment.md` | Draft comment for linux-surface#767 |
 | `where-the-volume-keys-went.html` | Write-up of the investigation |
