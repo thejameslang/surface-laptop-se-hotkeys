@@ -44,7 +44,9 @@ KEY_POWER is what makes the power key work.
 
 Fix: `dkms/surface_laptop_se_buttons.c` (v0.3), a platform driver matching
 `MSHW0040` with a DMI gate for "Surface Laptop SE". Install with
-`sudo bash install.sh`. Tested working, with the OSD appearing.
+`sudo bash install.sh`. All five keys tested working: volume and brightness
+show the OSD, and a short Power press gets COSMIC's power response
+(verified 2026-09-18).
 
 Other keys, handled by atkbd already:
 - Mute `e0 20` → KEY_MUTE
