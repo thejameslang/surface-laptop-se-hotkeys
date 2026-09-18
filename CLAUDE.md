@@ -54,6 +54,8 @@ Other keys, handled by atkbd already:
 - Search `e0 65` → KEY_SEARCH. It needs a desktop shortcut. On COSMIC the
   owner chose to bind it in Settings → Keyboard → Keyboard Shortcuts →
   Custom; they don't want it scripted.
+- Menu (context menu) key: works (verified in Firefox). COSMIC Files ignores
+  it, which is a COSMIC limitation (pop-os/cosmic-files#856), not a driver issue.
 
 ## Lessons from this project
 
