@@ -76,7 +76,6 @@ sudo rm -rf /usr/src/surface_laptop_se_buttons-0.3
   every keyboard
   ([cosmic-epoch#384](https://github.com/pop-os/cosmic-epoch/issues/384)),
   not this driver.
-
 - **No charge limit setting.** The firmware has no charge threshold that
   Linux can set, so desktop settings like Pop!_OS's 80% limit don't appear.
   The embedded controller has a built-in battery protection policy (`0x10`, set
