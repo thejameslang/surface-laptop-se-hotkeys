@@ -1,0 +1,3 @@
+# acpi_listen during the same presses
+button/mute MUTE 00000080 00000000 K
+cd/play CDPLAY 00000080 00000000 K

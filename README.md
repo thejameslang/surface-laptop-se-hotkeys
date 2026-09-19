@@ -90,6 +90,8 @@ sudo rm -rf /usr/src/surface_laptop_se_buttons-0.3
 | `CLAUDE.md` | Project context and open items for future Claude Code sessions |
 | `dkms/` | Driver source, `Makefile`, `dkms.conf` |
 | `install.sh` | DKMS installer and upgrader |
+| `tools/capture-keys.sh` | Records evtest, EC queries, i8042 and ACPI events while you press keys, to diagnose hotkeys (needs sudo) |
+| `evidence/` | Trimmed logs from the investigation (key events, EC traces, driver test, battery registers) |
 | `tools/read-battery-protection.py` | Read-only check of the embedded controller's battery-protection registers (needs sudo) |
 | `0001-platform-surface-surfacepro3_button-Add-support-for-.patch` | Upstream kernel patch that adds Laptop SE support to `surfacepro3_button`. Passes `checkpatch.pl`; not yet sent. |
 | `github-issue-767-comment.md` | Draft comment for linux-surface#767 |

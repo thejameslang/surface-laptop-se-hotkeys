@@ -1,0 +1,17 @@
+# Battery-protection registers (read-only), 2026-09-17/18
+BPMS (mode, 2 = protection on)   0x01  (bits 00000001)
+BPRP (policy)                    0x10  (bits 00010000)
+BPRS (status bits)               0x00  (bits 00000000)
+battery: Discharging, 48%
+---
+BPMS (mode, 2 = protection on)   0x01  (bits 00000001)
+BPRP (policy)                    0x10  (bits 00010000)
+BPRS (status bits)               0x00  (bits 00000000)
+battery: Charging, 54%
+---
+BPMS (mode, 2 = protection on)   0x01  (bits 00000001)
+BPRP (policy)                    0x10  (bits 00010000)
+BPRS (status bits)               0x00  (bits 00000000)
+battery: Full, 100%
+---
+3rd reading (plugged in overnight): BPMS 0x01, BPRP 0x10, BPRS 0x00, Full 100%

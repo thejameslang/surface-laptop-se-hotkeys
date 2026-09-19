@@ -1,0 +1,24 @@
+# EC queries: Bright Down x1, Bright Up x2, Vol Down x3, Vol Up x4, Play x5 (no EC), Search (no EC), Power x1
+[ 5809.001368] ACPI: EC: Query(0x1b) started
+[ 5809.161092] ACPI: EC: Query(0x1c) started
+[ 5812.623997] ACPI: EC: Query(0x16) started
+[ 5812.781210] ACPI: EC: Query(0x17) started
+[ 5813.802397] ACPI: EC: Query(0x16) started
+[ 5813.960583] ACPI: EC: Query(0x17) started
+[ 5817.223107] ACPI: EC: Query(0xd3) started
+[ 5817.344099] ACPI: EC: Query(0xd4) started
+[ 5818.148583] ACPI: EC: Query(0xd3) started
+[ 5818.272918] ACPI: EC: Query(0xd4) started
+[ 5819.342885] ACPI: EC: Query(0xd3) started
+[ 5819.455957] ACPI: EC: Query(0xd4) started
+[ 5821.434892] ACPI: EC: Query(0xd1) started
+[ 5821.549266] ACPI: EC: Query(0xd2) started
+[ 5822.332550] ACPI: EC: Query(0xd1) started
+[ 5822.453356] ACPI: EC: Query(0xd2) started
+[ 5823.273157] ACPI: EC: Query(0xd1) started
+[ 5823.381750] ACPI: EC: Query(0xd2) started
+[ 5824.172960] ACPI: EC: Query(0xd1) started
+[ 5824.290985] ACPI: EC: Query(0xd2) started
+[ 5841.936865] ACPI Error: No installed handler for fixed event - PowerButton (2), disabling (20251212/evevent-255)
+[ 5841.944823] ACPI: EC: Query(0xd5) started
+[ 5842.053758] ACPI: EC: Query(0xd6) started

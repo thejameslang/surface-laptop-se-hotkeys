@@ -1,0 +1,20 @@
+# Search key: raw i8042 bytes + evtest
+[ 6236.980245] i8042: [6236992] e0 <- i8042 (interrupt, 0, 1)
+[ 6236.983209] i8042: [6236995] 65 <- i8042 (interrupt, 0, 1)
+[ 6237.172201] i8042: [6237184] e0 <- i8042 (interrupt, 0, 1)
+[ 6237.177922] i8042: [6237189] e5 <- i8042 (interrupt, 0, 1)
+[ 6238.893985] i8042: [6238905] e0 <- i8042 (interrupt, 0, 1)
+[ 6238.896596] i8042: [6238908] 65 <- i8042 (interrupt, 0, 1)
+[ 6239.097203] i8042: [6239109] e0 <- i8042 (interrupt, 0, 1)
+[ 6239.103861] i8042: [6239115] e5 <- i8042 (interrupt, 0, 1)
+[ 6241.057654] i8042: [6241069] e0 <- i8042 (interrupt, 0, 1)
+[ 6241.060305] i8042: [6241072] 65 <- i8042 (interrupt, 0, 1)
+[ 6241.272929] i8042: [6241284] e0 <- i8042 (interrupt, 0, 1)
+[ 6241.278652] i8042: [6241290] e5 <- i8042 (interrupt, 0, 1)
+    Event code 217 (KEY_SEARCH)
+Event: time 1789702740.499452, type 1 (EV_KEY), code 217 (KEY_SEARCH), value 1
+Event: time 1789702740.694141, type 1 (EV_KEY), code 217 (KEY_SEARCH), value 0
+Event: time 1789702742.412843, type 1 (EV_KEY), code 217 (KEY_SEARCH), value 1
+Event: time 1789702742.620109, type 1 (EV_KEY), code 217 (KEY_SEARCH), value 0
+Event: time 1789702744.576558, type 1 (EV_KEY), code 217 (KEY_SEARCH), value 1
+Event: time 1789702744.794978, type 1 (EV_KEY), code 217 (KEY_SEARCH), value 0

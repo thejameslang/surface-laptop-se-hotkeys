@@ -1,0 +1,6 @@
+# Hold test: EC press/release timing, then kernel autorepeat (value 2) on the driver's device
+[ 6773.000335] ACPI: EC: Query(0xd1) started
+[ 6775.528610] ACPI: EC: Query(0xd2) started
+[ 6779.417846] ACPI: EC: Query(0x16) started
+[ 6782.834308] ACPI: EC: Query(0x17) started
+repeat events: 160

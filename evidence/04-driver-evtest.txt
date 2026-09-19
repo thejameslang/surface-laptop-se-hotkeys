@@ -1,0 +1,35 @@
+# Driver v0.1 test: evtest on 'Surface Laptop SE Buttons'
+[ 6053.567859] input: Surface Laptop SE Buttons as /devices/platform/MSHW0040:00/input/input15
+[ 6053.568226] surface_laptop_se_buttons MSHW0040:00: Surface Laptop SE buttons [BIND]
+../../../bus/platform/drivers/surface_laptop_se_buttons
+N: Name="Surface Laptop SE Buttons"
+P: Phys=MSHW0040/buttons
+S: Sysfs=/devices/platform/MSHW0040:00/input/input15
+Event: time 1789702563.584813, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 1
+Event: time 1789702563.731346, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 0
+Event: time 1789702563.961654, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 1
+Event: time 1789702564.089752, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 0
+Event: time 1789702564.188499, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 1
+Event: time 1789702564.266350, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 0
+Event: time 1789702564.360402, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 1
+Event: time 1789702564.489069, type 1 (EV_KEY), code 224 (KEY_BRIGHTNESSDOWN), value 0
+Event: time 1789702564.706924, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 1
+Event: time 1789702564.770596, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 0
+Event: time 1789702564.835975, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 1
+Event: time 1789702564.919635, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 0
+Event: time 1789702565.019440, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 1
+Event: time 1789702565.081116, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 0
+Event: time 1789702565.171907, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 1
+Event: time 1789702565.238483, type 1 (EV_KEY), code 225 (KEY_BRIGHTNESSUP), value 0
+Event: time 1789702566.667942, type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 1
+Event: time 1789702566.743098, type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 0
+Event: time 1789702566.904504, type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 1
+Event: time 1789702566.938744, type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 0
+Event: time 1789702567.076160, type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 1
+Event: time 1789702567.140581, type 1 (EV_KEY), code 114 (KEY_VOLUMEDOWN), value 0
+Event: time 1789702567.503374, type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 1
+Event: time 1789702567.610204, type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 0
+Event: time 1789702567.716971, type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 1
+Event: time 1789702567.786871, type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 0
+Event: time 1789702567.884440, type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 1
+Event: time 1789702567.976072, type 1 (EV_KEY), code 115 (KEY_VOLUMEUP), value 0

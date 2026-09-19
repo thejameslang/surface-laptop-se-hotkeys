@@ -1,7 +1,25 @@
 # Context for Claude Code sessions
 
 Project history and state, so a new session can continue without redoing the
-investigation. Last updated 2026-09-18.
+investigation. Last updated 2026-09-18, just before the laptop was
+reformatted from Pop!_OS to Linux Mint 22.3 Cinnamon.
+
+## After the reinstall (first steps for a new session)
+
+1. Check that the hotkey driver is installed and bound:
+   `dkms status surface_laptop_se_buttons` and
+   `readlink /sys/bus/platform/devices/MSHW0040:00/driver`.
+   If not: `sudo apt install dkms linux-headers-$(uname -r)` then
+   `sudo bash install.sh`.
+2. If Secure Boot is on, the MOK must be enrolled (see README).
+3. Search key: bind `XF86Search` (KEY_SEARCH) in Cinnamon's keyboard settings.
+4. Work apps: Citrix Workspace + EPA plugin + Horizon from their Ubuntu `.deb`
+   packages, using the Cinnamon X11 session.
+5. Then pick up the open items below.
+
+Tools: `tools/capture-keys.sh` for diagnosing keys,
+`tools/read-battery-protection.py` for the EC battery registers.
+`evidence/` holds the trimmed logs behind every claim here.
 
 ## The machine
 
