@@ -74,7 +74,7 @@ The power fixed event was also unhandled
 (`No installed handler for fixed event - PowerButton`), so the driver's
 KEY_POWER is what makes the power key work.
 
-Fix: `dkms/surface_laptop_se_buttons.c` (v0.3), a platform driver matching
+Fix: `dkms/surface_laptop_se_buttons.c` (v0.4), a platform driver matching
 `MSHW0040` with a DMI gate for "Surface Laptop SE". Install with
 `sudo bash install.sh`. All five keys tested working: volume and brightness
 show the OSD, and a short Power press gets COSMIC's power response
@@ -98,11 +98,15 @@ Other keys, handled by atkbd already:
   (pop-os/cosmic-epoch#384). That's not a driver bug. The owner declined a
   fake-tap workaround.
 - **Power key must never share an input device that has `EV_REP`.** logind
-  acts on `value > 0`, so repeats would retrigger the power action. v0.3
+  acts on `value > 0`, so repeats would retrigger the power action. v0.4
   keeps Power on its own device. The upstream patch has no `EV_REP` at all.
+- **Wake handling (v0.4):** follows `surfacepro3_button`. The driver data has
+  a `suspended` flag set and cleared by system sleep PM callbacks. While
+  suspended, a Power press is a hard wakeup event and no key is reported.
+  Every other press is ignored. This hasn't been tested on the hardware yet.
 - **Driver API history:** `.remove` returns void from 6.11 (`.remove_new`
   before that); `acpi_dev_install_notify_handler` gained a context argument
-  in 6.7. v0.3 has an untested fallback for 6.7–6.10.
+  in 6.7. v0.4 has an untested fallback for 6.7–6.10.
 
 ## Battery charge limit: not available
 

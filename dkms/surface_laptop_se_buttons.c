@@ -15,6 +15,8 @@
 #include <linux/input.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/pm.h>
+#include <linux/pm_wakeup.h>
 #include <linux/version.h>
 
 #define SLSE_NOTIFY_PRESS_VOLUME_UP		0xc0
@@ -46,6 +48,7 @@ static const struct dmi_system_id slse_dmi_table[] = {
 struct slse_buttons {
 	struct input_dev *hotkeys;
 	struct input_dev *power;
+	bool suspended;
 };
 
 static void slse_notify(acpi_handle handle, u32 event, void *data)
@@ -83,12 +86,38 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 		return;
 	}
 
-	if (pressed && key_code == KEY_POWER)
-		pm_wakeup_dev_event(dev, 0, true);
+	/*
+	 * Same pattern as surfacepro3_button. While suspended, only a power
+	 * press is reported to the PM core as a hard wakeup event, and no key
+	 * is reported to input: the press wakes the system and nothing else
+	 * should act on it. Otherwise it is a plain (soft) wakeup event.
+	 */
+	if (pressed && (!buttons->suspended || key_code == KEY_POWER))
+		pm_wakeup_dev_event(dev, 0, buttons->suspended);
+	if (buttons->suspended)
+		return;
 
 	input_report_key(input, key_code, pressed);
 	input_sync(input);
 }
+
+static int slse_suspend(struct device *dev)
+{
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+
+	buttons->suspended = true;
+	return 0;
+}
+
+static int slse_resume(struct device *dev)
+{
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+
+	buttons->suspended = false;
+	return 0;
+}
+
+static DEFINE_SIMPLE_DEV_PM_OPS(slse_pm, slse_suspend, slse_resume);
 
 static int slse_probe(struct platform_device *pdev)
 {
@@ -174,9 +203,12 @@ static struct platform_driver slse_driver = {
 	.driver = {
 		.name = "surface_laptop_se_buttons",
 		.acpi_match_table = slse_acpi_ids,
+		.pm = pm_sleep_ptr(&slse_pm),
 	},
 };
 module_platform_driver(slse_driver);
 
+MODULE_AUTHOR("James Lang");
 MODULE_DESCRIPTION("Surface Laptop SE hotkey driver");
+MODULE_VERSION("0.4");
 MODULE_LICENSE("GPL");

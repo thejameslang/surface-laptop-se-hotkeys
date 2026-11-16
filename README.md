@@ -63,8 +63,8 @@ screen, and enter the password you set.
 
 ```sh
 sudo modprobe -r surface_laptop_se_buttons
-sudo dkms remove -m surface_laptop_se_buttons -v 0.3 --all
-sudo rm -rf /usr/src/surface_laptop_se_buttons-0.3
+sudo dkms remove -m surface_laptop_se_buttons -v 0.4 --all
+sudo rm -rf /usr/src/surface_laptop_se_buttons-0.4
 ```
 
 ## Notes
