@@ -227,7 +227,7 @@ surface_gpe: <span class="b">no compatible Microsoft Surface device found, exiti
     <tr><td><code>soc_button_array</code></td><td>OEM revision ≠ 0, and GPIO resources</td><td>revision passes, but no <code>_CRS</code>/GPIOs</td><td><span class="verdict no">rejects</span></td></tr>
   </tbody>
 </table></div>
-<p>Each driver correctly decides the device isn't one of its own, so it ends up with neither. ACPI notifications for a device with no driver are dropped without a log message, which is why nothing ever showed up in <code>acpi_listen</code>. The power button turned out to be affected too:</p>
+<p>Each driver correctly decides the device isn't one of its own, so it ends up with neither. ACPI notifications for a device with no driver are dropped without a log message, which is why nothing ever showed up in <code>acpi_listen</code>. The kernel also logs this at boot. It is about ACPI's fixed hardware power button, which is separate from the unbound <code>MSHW0040</code> device:</p>
 <pre><code>ACPI Error: No installed handler for fixed event - PowerButton (2), disabling</code></pre>
 
 <h2><span class="step">05</span>Proving which key fires which event</h2>
@@ -280,17 +280,19 @@ surface_gpe: <span class="b">no compatible Microsoft Surface device found, exiti
   <li><strong>Kernel 6.7–6.10:</strong> covered by a compatibility fallback in the source, but not yet tested on those kernels.</li>
   <li><strong>Older than 6.7:</strong> not supported.</li>
 </ul>
-<pre><code>sudo mkdir -p /usr/src/surface_laptop_se_buttons-0.3
+<pre><code>sudo mkdir -p /usr/src/surface_laptop_se_buttons-0.4
 <span class="c"># copy surface_laptop_se_buttons.c, Makefile and dkms.conf (below) into that directory</span>
-sudo dkms install -m surface_laptop_se_buttons -v 0.3
+sudo dkms add -m surface_laptop_se_buttons -v 0.4
+sudo dkms install -m surface_laptop_se_buttons -v 0.4
 sudo modprobe surface_laptop_se_buttons</code></pre>
 <p>DKMS rebuilds the module automatically on every kernel update, and it loads at boot because it matches the ACPI device ID.</p>
 <div class="distros">
-  <div class="distro"><h3>Pop!_OS, Ubuntu, Mint</h3><p><code>sudo apt install dkms linux-headers-$(uname -r)</code>. Mint 22.2 and 22.3 ship kernel 6.14, which works as-is.</p></div>
-  <div class="distro"><h3>LMDE 7, Debian 13</h3><p><code>sudo apt install dkms linux-headers-$(uname -r)</code>. LMDE 7 ships kernel 6.12, which works as-is. LMDE 6 and Debian 12 (kernel 6.1) are too old unless you install a newer kernel from backports.</p></div>
-  <div class="distro"><h3>Fedora</h3><p><code>sudo dnf install dkms kernel-devel</code></p></div>
+  <div class="distro"><h3>Pop!_OS, Ubuntu, Mint</h3><p><code>sudo apt install dkms linux-headers-generic</code>. Mint 22.2 and 22.3 ship kernel 6.14, which works as-is.</p></div>
+  <div class="distro"><h3>LMDE 7, Debian 13</h3><p><code>sudo apt install dkms linux-headers-amd64</code>. LMDE 7 ships kernel 6.12, which works as-is. LMDE 6 and Debian 12 (kernel 6.1) are too old unless you install a newer kernel from backports.</p></div>
+  <div class="distro"><h3>Fedora</h3><p><code>sudo dnf install dkms kernel-devel-$(uname -r) kernel-devel</code></p></div>
   <div class="distro"><h3>Arch</h3><p><code>sudo pacman -S dkms linux-headers</code>. The linux-surface kernel works too; its <code>MSHW0040</code> drivers reject this device in the same way.</p></div>
 </div>
+<p>These header packages follow your kernel, so each kernel update also installs matching headers, which DKMS needs to rebuild the module. Headers for only the running kernel (<code>linux-headers-$(uname -r)</code>) would leave the next kernel without any.</p>
 
 <h3>With Secure Boot on</h3>
 <p>Secure Boot only loads kernel modules signed by a key the firmware trusts. You need to enrol a <em>Machine Owner Key</em> (MOK) once, and after that DKMS signs every rebuild automatically. The only difference between distro families is where DKMS keeps the key:</p>
@@ -348,6 +350,8 @@ sudo modprobe surface_laptop_se_buttons</code></pre>
 #include &lt;linux/input.h&gt;
 #include &lt;linux/module.h&gt;
 #include &lt;linux/platform_device.h&gt;
+#include &lt;linux/pm.h&gt;
+#include &lt;linux/pm_wakeup.h&gt;
 #include &lt;linux/version.h&gt;
 
 #define SLSE_NOTIFY_PRESS_VOLUME_UP		0xc0
@@ -379,6 +383,7 @@ static const struct dmi_system_id slse_dmi_table[] = {
 struct slse_buttons {
 	struct input_dev *hotkeys;
 	struct input_dev *power;
+	bool suspended;
 };
 
 static void slse_notify(acpi_handle handle, u32 event, void *data)
@@ -386,6 +391,7 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 	struct device *dev = data;
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 	struct input_dev *input = buttons-&gt;hotkeys;
+	bool suspended = READ_ONCE(buttons-&gt;suspended);
 	unsigned int key_code;
 	bool pressed = !(event &amp; 1);	/* even = press, odd = release */
 
@@ -416,12 +422,44 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 		return;
 	}
 
-	if (pressed &amp;&amp; key_code == KEY_POWER)
-		pm_wakeup_dev_event(dev, 0, true);
+	/*
+	 * While suspended, drop key presses so nothing acts on them, but always
+	 * pass releases through, so a key that was down when the system went to
+	 * sleep can't stay stuck.
+	 *
+	 * Unlike surfacepro3_button, which hard-wakes the system on any press,
+	 * only Power wakes it here (a hard wakeup event). That way volume and
+	 * brightness presses in a bag don't wake the laptop.
+	 */
+	if (pressed &amp;&amp; suspended) {
+		if (key_code == KEY_POWER)
+			pm_wakeup_dev_event(dev, 0, true);
+		return;
+	}
+	if (pressed)
+		pm_wakeup_dev_event(dev, 0, false);
 
 	input_report_key(input, key_code, pressed);
 	input_sync(input);
 }
+
+static int slse_suspend(struct device *dev)
+{
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+
+	WRITE_ONCE(buttons-&gt;suspended, true);
+	return 0;
+}
+
+static int slse_resume(struct device *dev)
+{
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+
+	WRITE_ONCE(buttons-&gt;suspended, false);
+	return 0;
+}
+
+static DEFINE_SIMPLE_DEV_PM_OPS(slse_pm, slse_suspend, slse_resume);
 
 static int slse_probe(struct platform_device *pdev)
 {
@@ -507,11 +545,14 @@ static struct platform_driver slse_driver = {
 	.driver = {
 		.name = &quot;surface_laptop_se_buttons&quot;,
 		.acpi_match_table = slse_acpi_ids,
+		.pm = pm_sleep_ptr(&amp;slse_pm),
 	},
 };
 module_platform_driver(slse_driver);
 
+MODULE_AUTHOR(&quot;James Lang&quot;);
 MODULE_DESCRIPTION(&quot;Surface Laptop SE hotkey driver&quot;);
+MODULE_VERSION(&quot;0.4&quot;);
 MODULE_LICENSE(&quot;GPL&quot;);</code></pre>
 </details>
 <details>
@@ -519,7 +560,8 @@ MODULE_LICENSE(&quot;GPL&quot;);</code></pre>
   <pre><code>obj-m += surface_laptop_se_buttons.o
 <span class="c"># ---- dkms.conf ----</span>
 PACKAGE_NAME=&quot;surface_laptop_se_buttons&quot;
-PACKAGE_VERSION=&quot;0.3&quot;
+PACKAGE_VERSION=&quot;0.4&quot;
+BUILD_EXCLUSIVE_KERNEL_MIN=&quot;6.7&quot;
 BUILT_MODULE_NAME[0]=&quot;surface_laptop_se_buttons&quot;
 DEST_MODULE_LOCATION[0]=&quot;/updates/dkms&quot;
 MAKE[0]=&quot;make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build modules&quot;

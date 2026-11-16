@@ -54,7 +54,8 @@ covered by a compatibility fallback that hasn't been tested.
    ```
 
 The module loads at boot, and DKMS rebuilds it on every kernel update. The
-installer also removes any older version it finds.
+installer builds the new version first and only then removes any older one, so
+if the build fails, the driver you already have stays installed.
 
 ### With Secure Boot on
 
@@ -85,6 +86,9 @@ screen, and enter the password you set.
   Boot off to use it.
 
 ### Uninstall
+
+Do this too once you run a kernel whose `surfacepro3_button` supports the
+Laptop SE. Both drivers match `MSHW0040`, so you don't want both.
 
 ```sh
 sudo modprobe -r surface_laptop_se_buttons

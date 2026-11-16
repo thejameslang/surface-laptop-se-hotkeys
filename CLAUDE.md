@@ -1,16 +1,20 @@
 # Context for Claude Code sessions
 
 Project history and state, so a new session can continue without redoing the
-investigation. Last updated 2026-09-18, just before the laptop was
-reformatted from Pop!_OS to Linux Mint 22.3 Cinnamon.
+investigation. Last updated 2026-11-15. Entries from before 2026-09-18
+describe the laptop as it was before it was reformatted from Pop!_OS to
+Linux Mint 22.3 Cinnamon.
 
 ## After the reinstall (first steps for a new session)
 
 1. Check that the hotkey driver is installed and bound:
    `dkms status surface_laptop_se_buttons` and
    `readlink /sys/bus/platform/devices/MSHW0040:00/driver`.
-   If not: `sudo apt install dkms linux-headers-$(uname -r)` then
-   `sudo bash install.sh`.
+   If not: `sudo apt install dkms linux-headers-generic` (Mint, Ubuntu,
+   Pop!_OS; Debian and LMDE use `linux-headers-amd64`), then
+   `sudo bash install.sh`. These packages follow kernel updates, so DKMS has
+   headers to rebuild with. Headers for only the running kernel
+   (`linux-headers-$(uname -r)`) don't.
 2. If Secure Boot is on, the MOK must be enrolled (see README).
 3. Search key: bind `XF86Search` (KEY_SEARCH) in Cinnamon's keyboard settings.
 4. Work apps: Citrix Workspace + EPA plugin + Horizon from their Ubuntu `.deb`

@@ -20,7 +20,7 @@ I tracked this down on a Surface Laptop SE (BIOS 11.6.139) running kernel 7.1.
 - `MSHW0040:00` has no driver bound. Both candidate drivers reject it:
   - `surfacepro3_button`: the object is named `BIND`, not `VGBI`, **and** `_DSM` (`6fd05c69-cde3-49f4-95ed-ab1665498035`, rev 1, fn 2) returns OEM platform revision `0x4E`. The driver only accepts revision 0 (Pro 4 / Book 1).
   - `soc_button_array`: passes the revision check but `BIND` has no `_CRS`/GPIOs, so it fails with "no GPIO attached".
-- Side effect: the power key is affected too (`ACPI Error: No installed handler for fixed event - PowerButton (2), disabling`).
+- The kernel also logs `ACPI Error: No installed handler for fixed event - PowerButton (2), disabling`. That message is about ACPI's fixed hardware power button, which is separate from the `MSHW0040` device.
 
 Mute (`e0 20`), Play/Pause (`e0 22`) and Search (`e0 65` → `KEY_SEARCH`) are ordinary PS/2 keys and already work at the kernel level. Search may just need a shortcut bound in your DE.
 
@@ -97,6 +97,7 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 	struct device *dev = data;
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 	struct input_dev *input = buttons->hotkeys;
+	bool suspended = READ_ONCE(buttons->suspended);
 	unsigned int key_code;
 	bool pressed = !(event & 1);	/* even = press, odd = release */
 
@@ -128,15 +129,21 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 	}
 
 	/*
-	 * Same pattern as surfacepro3_button. While suspended, only a power
-	 * press is reported to the PM core as a hard wakeup event, and no key
-	 * is reported to input: the press wakes the system and nothing else
-	 * should act on it. Otherwise it is a plain (soft) wakeup event.
+	 * While suspended, drop key presses so nothing acts on them, but always
+	 * pass releases through, so a key that was down when the system went to
+	 * sleep can't stay stuck.
+	 *
+	 * Unlike surfacepro3_button, which hard-wakes the system on any press,
+	 * only Power wakes it here (a hard wakeup event). That way volume and
+	 * brightness presses in a bag don't wake the laptop.
 	 */
-	if (pressed && (!buttons->suspended || key_code == KEY_POWER))
-		pm_wakeup_dev_event(dev, 0, buttons->suspended);
-	if (buttons->suspended)
+	if (pressed && suspended) {
+		if (key_code == KEY_POWER)
+			pm_wakeup_dev_event(dev, 0, true);
 		return;
+	}
+	if (pressed)
+		pm_wakeup_dev_event(dev, 0, false);
 
 	input_report_key(input, key_code, pressed);
 	input_sync(input);
@@ -146,7 +153,7 @@ static int slse_suspend(struct device *dev)
 {
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 
-	buttons->suspended = true;
+	WRITE_ONCE(buttons->suspended, true);
 	return 0;
 }
 
@@ -154,7 +161,7 @@ static int slse_resume(struct device *dev)
 {
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 
-	buttons->suspended = false;
+	WRITE_ONCE(buttons->suspended, false);
 	return 0;
 }
 
@@ -265,6 +272,7 @@ obj-m += surface_laptop_se_buttons.o
 ```sh
 PACKAGE_NAME="surface_laptop_se_buttons"
 PACKAGE_VERSION="0.4"
+BUILD_EXCLUSIVE_KERNEL_MIN="6.7"
 BUILT_MODULE_NAME[0]="surface_laptop_se_buttons"
 DEST_MODULE_LOCATION[0]="/updates/dkms"
 MAKE[0]="make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build modules"
@@ -273,7 +281,7 @@ AUTOINSTALL="yes"
 ```
 </details>
 
-Tested on Pop!_OS (COSMIC, kernel 7.1.5) with v0.3: volume up/down, brightness up/down and power all work, and the OSD shows. v0.4 adds suspend/wake handling (modelled on `surfacepro3_button`) that hasn't been tested on the hardware yet.
+Tested on Pop!_OS (COSMIC, kernel 7.1.5) with v0.3: volume up/down, brightness up/down and power all work, and the OSD shows. v0.4 adds suspend/wake handling (based on `surfacepro3_button`, except that only the Power key wakes the laptop) that hasn't been tested on the hardware yet.
 
 ### Upstream
 
