@@ -252,7 +252,7 @@ surface_gpe: <span class="b">no compatible Microsoft Surface device found, exiti
 <p>The volume and power codes are the same ones <code>surfacepro3_button</code> already handles for the Pro 4. The two brightness pairs are new, and no existing driver knows them.</p>
 
 <h2><span class="step">06</span>The fix</h2>
-<p>The fix is a small platform driver (under 200 lines), <code>surface_laptop_se_buttons</code>. It binds <code>MSHW0040</code> only when DMI identifies the machine as a Surface Laptop SE, installs an ACPI notify handler, and translates the codes into standard key events. The core of it:</p>
+<p>The fix is a small platform driver (about 220 lines), <code>surface_laptop_se_buttons</code>. It binds <code>MSHW0040</code> only when DMI identifies the machine as a Surface Laptop SE, installs an ACPI notify handler, and translates the codes into standard key events. The core of it:</p>
 <pre><code>static void slse_notify(acpi_handle handle, u32 event, void *data)
 {
 	…
@@ -287,12 +287,13 @@ sudo dkms install -m surface_laptop_se_buttons -v 0.4
 sudo modprobe surface_laptop_se_buttons</code></pre>
 <p>DKMS rebuilds the module automatically on every kernel update, and it loads at boot because it matches the ACPI device ID.</p>
 <div class="distros">
-  <div class="distro"><h3>Pop!_OS, Ubuntu, Mint</h3><p><code>sudo apt install dkms linux-headers-generic</code>. Mint 22.2 and 22.3 ship kernel 6.14, which works as-is.</p></div>
+  <div class="distro"><h3>Ubuntu, Pop!_OS</h3><p><code>sudo apt install dkms linux-headers-generic</code></p></div>
+  <div class="distro"><h3>Mint 22.x</h3><p><code>sudo apt install dkms linux-headers-generic-hwe-24.04</code>. Mint 22 uses the HWE kernel, so the headers have to be the HWE ones. Mint 22.2 and 22.3 ship kernel 6.14, which works as-is.</p></div>
   <div class="distro"><h3>LMDE 7, Debian 13</h3><p><code>sudo apt install dkms linux-headers-amd64</code>. LMDE 7 ships kernel 6.12, which works as-is. LMDE 6 and Debian 12 (kernel 6.1) are too old unless you install a newer kernel from backports.</p></div>
   <div class="distro"><h3>Fedora</h3><p><code>sudo dnf install dkms kernel-devel-$(uname -r) kernel-devel</code></p></div>
   <div class="distro"><h3>Arch</h3><p><code>sudo pacman -S dkms linux-headers</code>. The linux-surface kernel works too; its <code>MSHW0040</code> drivers reject this device in the same way.</p></div>
 </div>
-<p>These header packages follow your kernel, so each kernel update also installs matching headers, which DKMS needs to rebuild the module. Headers for only the running kernel (<code>linux-headers-$(uname -r)</code>) would leave the next kernel without any.</p>
+<p>These header packages follow your kernel, so each kernel update also installs matching headers, which DKMS needs to rebuild the module. Headers for only the running kernel (<code>linux-headers-$(uname -r)</code>) would leave the next kernel without any. On Ubuntu and Mint the headers package has to match the kernel package: <code>linux-image-generic-hwe-24.04</code> pairs with <code>linux-headers-generic-hwe-24.04</code>, and <code>linux-image-generic</code> with <code>linux-headers-generic</code>. <code>install.sh</code> works this out and prints the command if headers are missing.</p>
 
 <h3>With Secure Boot on</h3>
 <p>Secure Boot only loads kernel modules signed by a key the firmware trusts. You need to enrol a <em>Machine Owner Key</em> (MOK) once, and after that DKMS signs every rebuild automatically. The only difference between distro families is where DKMS keeps the key:</p>
@@ -312,7 +313,7 @@ sudo modprobe surface_laptop_se_buttons</code></pre>
 <p>You do this once. Kernel updates are signed with the same key. Immutable distros (Silverblue, Bazzite, SteamOS) make adding kernel modules hard; they'll have to wait for the upstream fix.</p>
 
 <h2><span class="step">09</span>Getting it upstream</h2>
-<p>Once a fix is in the mainline kernel, every distro gets it automatically, with no DKMS and no signing. A patch has been prepared that teaches the existing <code>surfacepro3_button</code> driver about the Laptop SE: it recognises the <code>BIND</code> object on this model by DMI, skips the VGBI/revision checks for it, and adds the brightness codes. It compiles against 7.1 and passes <code>checkpatch.pl</code> with 0 errors and 0 warnings. It hasn't been sent to the maintainers or the <code>platform-driver-x86</code> list yet.</p>
+<p>Once a fix is in the mainline kernel, every distro gets it automatically, with no DKMS and no signing. A patch has been prepared that teaches the existing <code>surfacepro3_button</code> driver about the Laptop SE: it recognises the <code>BIND</code> object on this model by DMI, skips the VGBI/revision checks for it, and adds the brightness codes. An earlier revision compiled against 7.1. The latest one, which declares the brightness keys only on the Laptop SE, hasn't been build-tested yet. It is clean under <code>checkpatch.pl --strict</code> apart from the missing <code>Signed-off-by</code>, which the author adds. It hasn't been sent to the maintainers or the <code>platform-driver-x86</code> list yet.</p>
 
 <h2><span class="step">10</span>The toolbox</h2>
 <p>None of this is specific to Surface hardware. If a hotkey on any laptop does nothing, these checks find out where it disappears.</p>

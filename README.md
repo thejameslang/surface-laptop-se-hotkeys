@@ -32,7 +32,8 @@ covered by a compatibility fallback that hasn't been tested.
    | Distro | Command |
    |---|---|
    | Debian, LMDE | `sudo apt install dkms linux-headers-amd64` |
-   | Ubuntu, Mint, Pop!_OS | `sudo apt install dkms linux-headers-generic` |
+   | Ubuntu, Pop!_OS | `sudo apt install dkms linux-headers-generic` |
+   | Mint 22.x | `sudo apt install dkms linux-headers-generic-hwe-24.04` |
    | Fedora | `sudo dnf install dkms kernel-devel-$(uname -r) kernel-devel` |
    | Arch | `sudo pacman -S dkms linux-headers` |
 
@@ -40,8 +41,17 @@ covered by a compatibility fallback that hasn't been tested.
    matching headers. DKMS needs those to rebuild the module for the new kernel.
    Headers for only the running kernel (`linux-headers-$(uname -r)`) would
    leave the next kernel without any, and the hotkeys would stop working after
-   the update. If you run a different kernel flavour (HWE, lowlatency, LTS and
-   so on), install the headers package for that flavour instead. On Fedora,
+   the update.
+
+   On Ubuntu and Mint, the headers package has to match the kernel package you
+   have. Mint 22.x uses the HWE kernel, so it needs
+   `linux-headers-generic-hwe-24.04`. The pairs are
+   `linux-image-generic-hwe-24.04` with `linux-headers-generic-hwe-24.04`, and
+   `linux-image-generic` with `linux-headers-generic`. To see which you have,
+   run `dpkg -l 'linux-image-generic*'`. If the headers are missing, `install.sh`
+   works this out and prints the command. For another kernel flavour
+   (lowlatency, LTS and so on), install the headers package for that flavour.
+   On Fedora,
    `kernel-devel-$(uname -r)` covers the kernel you're running now, and
    `kernel-devel` covers the ones that follow.
 
@@ -54,8 +64,11 @@ covered by a compatibility fallback that hasn't been tested.
    ```
 
 The module loads at boot, and DKMS rebuilds it on every kernel update. The
-installer builds the new version first and only then removes any older one, so
-if the build fails, the driver you already have stays installed.
+installer builds the new version first and only then removes any older one. If
+you're upgrading from a different version and the build fails, the driver you
+already have stays installed. If you're reinstalling the same version, that
+version has to be removed first so it rebuilds cleanly, so a failed build
+leaves you without it.
 
 ### With Secure Boot on
 

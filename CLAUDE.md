@@ -10,10 +10,14 @@ Linux Mint 22.3 Cinnamon.
 1. Check that the hotkey driver is installed and bound:
    `dkms status surface_laptop_se_buttons` and
    `readlink /sys/bus/platform/devices/MSHW0040:00/driver`.
-   If not: `sudo apt install dkms linux-headers-generic` (Mint, Ubuntu,
-   Pop!_OS; Debian and LMDE use `linux-headers-amd64`), then
-   `sudo bash install.sh`. These packages follow kernel updates, so DKMS has
-   headers to rebuild with. Headers for only the running kernel
+   If not: `sudo apt install dkms linux-headers-generic-hwe-24.04` (Mint 22.x
+   uses the HWE kernel; plain Ubuntu and Pop!_OS use `linux-headers-generic`,
+   and Debian and LMDE use `linux-headers-amd64`), then `sudo bash install.sh`.
+   The headers package must match the installed kernel package
+   (`linux-image-generic-hwe-24.04` pairs with
+   `linux-headers-generic-hwe-24.04`; check with
+   `dpkg -l 'linux-image-generic*'`). These packages follow kernel updates, so
+   DKMS has headers to rebuild with. Headers for only the running kernel
    (`linux-headers-$(uname -r)`) don't.
 2. If Secure Boot is on, the MOK must be enrolled (see README).
 3. Search key: bind `XF86Search` (KEY_SEARCH) in Cinnamon's keyboard settings.
