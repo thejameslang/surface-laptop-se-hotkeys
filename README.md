@@ -118,14 +118,25 @@ sudo rm -rf /usr/src/surface_laptop_se_buttons-0.4
 | `tools/capture-keys.sh` | Records evtest, EC queries, i8042 and ACPI events while you press keys, to diagnose hotkeys (needs sudo) |
 | `evidence/` | Trimmed logs from the investigation (key events, EC traces, driver test, battery registers) |
 | `tools/read-battery-protection.py` | Read-only check of the embedded controller's battery-protection registers (needs sudo) |
-| `0001-platform-surface-surfacepro3_button-Add-support-for-.patch` | Upstream kernel patch that adds Laptop SE support to `surfacepro3_button`. Passes `checkpatch.pl`; not yet sent. |
+| `0001-platform-surface-surfacepro3_button-Add-support-for-.patch` | Upstream kernel patch that adds Laptop SE support to `surfacepro3_button`. Passes `checkpatch.pl --strict` apart from the missing `Signed-off-by`. Not yet sent: it still needs `git commit --amend -s` and a test-apply on pdx86 `for-next` (see below). |
 | `github-issue-767-comment.md` | Draft comment for linux-surface#767 |
 | `where-the-volume-keys-went.html` | Write-up of the investigation |
 | `dsdt-surface-laptop-se.dsl` | Decompiled DSDT. EC `_Qxx` methods are near line 5070, the `BIND` device near line 7260. |
 
 ## Sending the kernel patch
 
-Replace `YOUR NAME` in the `Signed-off-by:` line, then:
+The patch has no `Signed-off-by:` line, and its author is set to the repo
+owner's git identity. Before sending it:
+
+1. Apply it to a checkout of the pdx86 `for-next` branch
+   (`platform-drivers-x86` on git.kernel.org) with `git am`, and fix anything
+   that doesn't apply. It was written against upstream commit `5798b46271e2`,
+   and it no longer applies to current Linux master, because
+   `57de5fb31981` changed the surrounding lines.
+2. Add the sign-off with `git commit --amend -s`.
+3. Regenerate the file with `git format-patch -1`.
+
+Then send it:
 
 ```sh
 git send-email \

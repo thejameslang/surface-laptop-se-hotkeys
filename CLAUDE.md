@@ -131,10 +131,15 @@ Other keys, handled by atkbd already:
 
 ## Open items
 
-- [ ] Kernel patch (`0001-*.patch`, `surfacepro3_button`, checkpatch clean,
-      builds against 7.1): replace `YOUR NAME` in Signed-off-by (the owner
-      must add it themselves), optionally boot-test a patched kernel, then
-      send with the `git send-email` command in the README.
+- [ ] Kernel patch (`0001-*.patch`, `surfacepro3_button`). checkpatch
+      `--strict` is clean except for the missing Signed-off-by, which the
+      owner adds themselves with `git commit --amend -s`. The owner also
+      test-applies it on pdx86 `for-next` first (it is based on upstream
+      `5798b46271e2` and doesn't apply to current master). The latest
+      revision (brightness keys declared only on the Laptop SE, reworded
+      message about the fixed power button event) hasn't been build-tested.
+      Optionally boot-test a patched kernel, then send with the
+      `git send-email` command in the README.
       Uses `Assisted-by: Claude:claude-opus-5` per the kernel's
       coding-assistants.rst.
 - [ ] Post `github-issue-767-comment.md` on linux-surface#767. It isn't
