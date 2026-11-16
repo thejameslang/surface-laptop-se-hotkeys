@@ -100,10 +100,14 @@ Other keys, handled by atkbd already:
 - **Power key must never share an input device that has `EV_REP`.** logind
   acts on `value > 0`, so repeats would retrigger the power action. v0.4
   keeps Power on its own device. The upstream patch has no `EV_REP` at all.
-- **Wake handling (v0.4):** follows `surfacepro3_button`. The driver data has
-  a `suspended` flag set and cleared by system sleep PM callbacks. While
-  suspended, a Power press is a hard wakeup event and no key is reported.
-  Every other press is ignored. This hasn't been tested on the hardware yet.
+- **Wake handling (v0.4):** based on `surfacepro3_button`. The driver data has
+  a `suspended` flag, set and cleared (`WRITE_ONCE`) by system sleep PM
+  callbacks and read once per event (`READ_ONCE`). While suspended, presses
+  are dropped, and a Power press is also a hard wakeup event. Releases always
+  pass through, so no key can stick across suspend. This differs from
+  upstream on purpose: it hard-wakes on any press, but here only Power wakes,
+  so volume/brightness presses in a bag don't wake the laptop. Not tested on
+  the hardware yet.
 - **Driver API history:** `.remove` returns void from 6.11 (`.remove_new`
   before that); `acpi_dev_install_notify_handler` gained a context argument
   in 6.7. v0.4 has an untested fallback for 6.7–6.10.

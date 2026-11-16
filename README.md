@@ -101,6 +101,11 @@ sudo rm -rf /usr/src/surface_laptop_se_buttons-0.4
   every keyboard
   ([cosmic-epoch#384](https://github.com/pop-os/cosmic-epoch/issues/384)),
   not this driver.
+- **Wake from sleep:** only the Power key wakes the laptop. Volume and
+  brightness presses while it's asleep are ignored on purpose, so a laptop in a
+  bag doesn't wake up when something presses its keys. This differs from the
+  upstream `surfacepro3_button` driver, which wakes on any key. The suspend and
+  wake code hasn't been tested on the hardware yet.
 - **No charge limit setting.** The firmware has no charge threshold that
   Linux can set, so desktop settings like Pop!_OS's 80% limit don't appear.
   The embedded controller has a built-in battery protection policy (`0x10`, set

@@ -56,6 +56,7 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 	struct device *dev = data;
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 	struct input_dev *input = buttons->hotkeys;
+	bool suspended = READ_ONCE(buttons->suspended);
 	unsigned int key_code;
 	bool pressed = !(event & 1);	/* even = press, odd = release */
 
@@ -87,15 +88,21 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 	}
 
 	/*
-	 * Same pattern as surfacepro3_button. While suspended, only a power
-	 * press is reported to the PM core as a hard wakeup event, and no key
-	 * is reported to input: the press wakes the system and nothing else
-	 * should act on it. Otherwise it is a plain (soft) wakeup event.
+	 * While suspended, drop key presses so nothing acts on them, but always
+	 * pass releases through, so a key that was down when the system went to
+	 * sleep can't stay stuck.
+	 *
+	 * Unlike surfacepro3_button, which hard-wakes the system on any press,
+	 * only Power wakes it here (a hard wakeup event). That way volume and
+	 * brightness presses in a bag don't wake the laptop.
 	 */
-	if (pressed && (!buttons->suspended || key_code == KEY_POWER))
-		pm_wakeup_dev_event(dev, 0, buttons->suspended);
-	if (buttons->suspended)
+	if (pressed && suspended) {
+		if (key_code == KEY_POWER)
+			pm_wakeup_dev_event(dev, 0, true);
 		return;
+	}
+	if (pressed)
+		pm_wakeup_dev_event(dev, 0, false);
 
 	input_report_key(input, key_code, pressed);
 	input_sync(input);
@@ -105,7 +112,7 @@ static int slse_suspend(struct device *dev)
 {
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 
-	buttons->suspended = true;
+	WRITE_ONCE(buttons->suspended, true);
 	return 0;
 }
 
@@ -113,7 +120,7 @@ static int slse_resume(struct device *dev)
 {
 	struct slse_buttons *buttons = dev_get_drvdata(dev);
 
-	buttons->suspended = false;
+	WRITE_ONCE(buttons->suspended, false);
 	return 0;
 }
 
