@@ -26,12 +26,13 @@ Mute (`e0 20`), Play/Pause (`e0 22`) and Search (`e0 65` → `KEY_SEARCH`) are o
 
 ### Workaround: out-of-tree module
 
-A small platform driver that binds MSHW0040, only on DMI "Surface Laptop SE". The EC sends real press/release events (a held key stays pressed until you let go). Whether holding repeats is then up to your desktop. COSMIC currently doesn't repeat volume/brightness shortcuts on any keyboard (pop-os/cosmic-epoch#384). Needs kernel 6.7 or newer. With Secure Boot enabled the module must be signed with an enrolled MOK (Ubuntu/Mint DKMS does the signing; you enroll the key once).
+A small platform driver that binds MSHW0040, only on DMI "Surface Laptop SE". The EC sends real press/release events (a held key stays pressed until you let go). Whether holding repeats is then up to your desktop. COSMIC currently doesn't repeat volume/brightness shortcuts on any keyboard (pop-os/cosmic-epoch#384). Needs kernel 6.11 or newer. It was tested on 7.1.5. Kernels 6.7–6.10 are covered by a compatibility fallback that hasn't been tested. With Secure Boot enabled the module must be signed with an enrolled MOK (Ubuntu/Mint DKMS does the signing; you enroll the key once).
 
 ```sh
-sudo mkdir -p /usr/src/surface_laptop_se_buttons-0.3
+sudo mkdir -p /usr/src/surface_laptop_se_buttons-0.4
 # put the three files below in that directory, then:
-sudo dkms install -m surface_laptop_se_buttons -v 0.3
+sudo dkms add -m surface_laptop_se_buttons -v 0.4
+sudo dkms install -m surface_laptop_se_buttons -v 0.4
 sudo modprobe surface_laptop_se_buttons
 ```
 
@@ -55,6 +56,8 @@ sudo modprobe surface_laptop_se_buttons
 #include <linux/input.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/pm.h>
+#include <linux/pm_wakeup.h>
 #include <linux/version.h>
 
 #define SLSE_NOTIFY_PRESS_VOLUME_UP		0xc0
@@ -86,6 +89,7 @@ static const struct dmi_system_id slse_dmi_table[] = {
 struct slse_buttons {
 	struct input_dev *hotkeys;
 	struct input_dev *power;
+	bool suspended;
 };
 
 static void slse_notify(acpi_handle handle, u32 event, void *data)
@@ -123,12 +127,38 @@ static void slse_notify(acpi_handle handle, u32 event, void *data)
 		return;
 	}
 
-	if (pressed && key_code == KEY_POWER)
-		pm_wakeup_dev_event(dev, 0, true);
+	/*
+	 * Same pattern as surfacepro3_button. While suspended, only a power
+	 * press is reported to the PM core as a hard wakeup event, and no key
+	 * is reported to input: the press wakes the system and nothing else
+	 * should act on it. Otherwise it is a plain (soft) wakeup event.
+	 */
+	if (pressed && (!buttons->suspended || key_code == KEY_POWER))
+		pm_wakeup_dev_event(dev, 0, buttons->suspended);
+	if (buttons->suspended)
+		return;
 
 	input_report_key(input, key_code, pressed);
 	input_sync(input);
 }
+
+static int slse_suspend(struct device *dev)
+{
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+
+	buttons->suspended = true;
+	return 0;
+}
+
+static int slse_resume(struct device *dev)
+{
+	struct slse_buttons *buttons = dev_get_drvdata(dev);
+
+	buttons->suspended = false;
+	return 0;
+}
+
+static DEFINE_SIMPLE_DEV_PM_OPS(slse_pm, slse_suspend, slse_resume);
 
 static int slse_probe(struct platform_device *pdev)
 {
@@ -214,11 +244,14 @@ static struct platform_driver slse_driver = {
 	.driver = {
 		.name = "surface_laptop_se_buttons",
 		.acpi_match_table = slse_acpi_ids,
+		.pm = pm_sleep_ptr(&slse_pm),
 	},
 };
 module_platform_driver(slse_driver);
 
+MODULE_AUTHOR("James Lang");
 MODULE_DESCRIPTION("Surface Laptop SE hotkey driver");
+MODULE_VERSION("0.4");
 MODULE_LICENSE("GPL");
 ```
 </details>
@@ -231,7 +264,7 @@ obj-m += surface_laptop_se_buttons.o
 
 ```sh
 PACKAGE_NAME="surface_laptop_se_buttons"
-PACKAGE_VERSION="0.3"
+PACKAGE_VERSION="0.4"
 BUILT_MODULE_NAME[0]="surface_laptop_se_buttons"
 DEST_MODULE_LOCATION[0]="/updates/dkms"
 MAKE[0]="make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build modules"
@@ -240,7 +273,7 @@ AUTOINSTALL="yes"
 ```
 </details>
 
-Tested on Pop!_OS (COSMIC, kernel 7.1.5): volume up/down, brightness up/down and power all work, and the OSD shows.
+Tested on Pop!_OS (COSMIC, kernel 7.1.5) with v0.3: volume up/down, brightness up/down and power all work, and the OSD shows. v0.4 adds suspend/wake handling (modelled on `surfacepro3_button`) that hasn't been tested on the hardware yet.
 
 ### Upstream
 
