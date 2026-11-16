@@ -1,4 +1,4 @@
-From 9f3889d512746c11352e900c4423cebee8981ee2 Mon Sep 17 00:00:00 2001
+From 39bf037a3ed1967dd68ac52cb18b3e6cc4e6a76a Mon Sep 17 00:00:00 2001
 From: James Lang <hi@thejameslang.com>
 Date: Sun, 15 Nov 2026 19:47:36 -0600
 Subject: [PATCH] platform/surface: surfacepro3_button: Add support for Surface
@@ -28,6 +28,10 @@ VGBI/OEM Platform Revision checks for it, and map the brightness events
 to KEY_BRIGHTNESSUP/KEY_BRIGHTNESSDOWN. Only declare the brightness keys on
 the Laptop SE, so the input devices of other Surface Pro 3/4 models are
 unchanged.
+
+The driver's existing wake handling is not changed, so on the Laptop SE
+any button press, including volume and brightness, wakes the system from
+suspend, as on the Pro 3/4.
 
 Link: https://github.com/linux-surface/linux-surface/issues/767
 Assisted-by: Claude:claude-opus-5
