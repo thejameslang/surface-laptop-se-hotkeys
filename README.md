@@ -33,7 +33,8 @@ covered by a compatibility fallback that hasn't been tested.
    |---|---|
    | Debian, LMDE | `sudo apt install dkms linux-headers-amd64` |
    | Ubuntu, Pop!_OS | `sudo apt install dkms linux-headers-generic` |
-   | Mint 22.x | `sudo apt install dkms linux-headers-generic-hwe-24.04` |
+   | Mint 22.0, 22.1 | `sudo apt install dkms linux-headers-generic` |
+   | Mint 22.2, 22.3 | `sudo apt install dkms linux-headers-generic-hwe-24.04` |
    | Fedora | `sudo dnf install dkms kernel-devel-$(uname -r) kernel-devel` |
    | Arch | `sudo pacman -S dkms linux-headers` |
 
@@ -44,8 +45,9 @@ covered by a compatibility fallback that hasn't been tested.
    the update.
 
    On Ubuntu and Mint, the headers package has to match the kernel package you
-   have. Mint 22.x uses the HWE kernel, so it needs
-   `linux-headers-generic-hwe-24.04`. The pairs are
+   have. Mint 22.2 and 22.3 use the HWE kernel, so they need
+   `linux-headers-generic-hwe-24.04`, while Mint 22.0 and 22.1 use
+   `linux-headers-generic`. The pairs are
    `linux-image-generic-hwe-24.04` with `linux-headers-generic-hwe-24.04`, and
    `linux-image-generic` with `linux-headers-generic`. To see which you have,
    run `dpkg -l 'linux-image-generic*'`. If the headers are missing, `install.sh`
@@ -78,12 +80,17 @@ because of Secure Boot, `install.sh` prints the right command for the key it
 finds and stops. Otherwise, enrol the key yourself:
 
 ```sh
-sudo mokutil --import /var/lib/shim-signed/mok/MOK.der   # Ubuntu, Pop!_OS, Mint (skip if the installer prompted you)
+sudo mokutil --import /var/lib/shim-signed/mok/MOK.der   # Ubuntu, Pop!_OS, Mint (skip if you already set a MOK password, see below)
 sudo mokutil --import /var/lib/dkms/mok.pub              # Debian, LMDE, Fedora, Arch
 ```
 
 Reboot, choose **Enroll MOK → Continue → Yes** on the blue MOK Manager
 screen, and enter the password you set.
+
+"Already set a MOK password" means Ubuntu's `update-secureboot-policy` asked you
+for one. apt shows that prompt when it installs `dkms` or `shim-signed`, and
+DKMS shows it the first time it has to create a signing key, which can happen
+while `install.sh` runs `dkms`. `install.sh` has no password prompt of its own.
 
 - **Fedora:** `/var/lib/dkms/mok.pub` is DKMS's default key location, which
   DKMS creates the first time it builds a module. I haven't tested this on

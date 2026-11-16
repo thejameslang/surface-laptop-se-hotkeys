@@ -10,9 +10,10 @@ Linux Mint 22.3 Cinnamon.
 1. Check that the hotkey driver is installed and bound:
    `dkms status surface_laptop_se_buttons` and
    `readlink /sys/bus/platform/devices/MSHW0040:00/driver`.
-   If not: `sudo apt install dkms linux-headers-generic-hwe-24.04` (Mint 22.x
-   uses the HWE kernel; plain Ubuntu and Pop!_OS use `linux-headers-generic`,
-   and Debian and LMDE use `linux-headers-amd64`), then `sudo bash install.sh`.
+   If not: `sudo apt install dkms linux-headers-generic-hwe-24.04` (Mint 22.2
+   and 22.3 use the HWE kernel, so that's right for Mint 22.3; Mint 22.0 and
+   22.1, Ubuntu and Pop!_OS use `linux-headers-generic`, and Debian and LMDE
+   use `linux-headers-amd64`), then `sudo bash install.sh`.
    The headers package must match the installed kernel package
    (`linux-image-generic-hwe-24.04` pairs with
    `linux-headers-generic-hwe-24.04`; check with

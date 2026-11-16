@@ -288,7 +288,8 @@ sudo modprobe surface_laptop_se_buttons</code></pre>
 <p>DKMS rebuilds the module automatically on every kernel update, and it loads at boot because it matches the ACPI device ID.</p>
 <div class="distros">
   <div class="distro"><h3>Ubuntu, Pop!_OS</h3><p><code>sudo apt install dkms linux-headers-generic</code></p></div>
-  <div class="distro"><h3>Mint 22.x</h3><p><code>sudo apt install dkms linux-headers-generic-hwe-24.04</code>. Mint 22 uses the HWE kernel, so the headers have to be the HWE ones. Mint 22.2 and 22.3 ship kernel 6.14, which works as-is.</p></div>
+  <div class="distro"><h3>Mint 22.2, 22.3</h3><p><code>sudo apt install dkms linux-headers-generic-hwe-24.04</code>. These versions use the HWE kernel, so the headers have to be the HWE ones. They ship kernel 6.14, which works as-is.</p></div>
+  <div class="distro"><h3>Mint 22.0, 22.1</h3><p><code>sudo apt install dkms linux-headers-generic</code></p></div>
   <div class="distro"><h3>LMDE 7, Debian 13</h3><p><code>sudo apt install dkms linux-headers-amd64</code>. LMDE 7 ships kernel 6.12, which works as-is. LMDE 6 and Debian 12 (kernel 6.1) are too old unless you install a newer kernel from backports.</p></div>
   <div class="distro"><h3>Fedora</h3><p><code>sudo dnf install dkms kernel-devel-$(uname -r) kernel-devel</code></p></div>
   <div class="distro"><h3>Arch</h3><p><code>sudo pacman -S dkms linux-headers</code>. The linux-surface kernel works too; its <code>MSHW0040</code> drivers reject this device in the same way.</p></div>
@@ -565,8 +566,6 @@ PACKAGE_VERSION=&quot;0.4&quot;
 BUILD_EXCLUSIVE_KERNEL_MIN=&quot;6.7&quot;
 BUILT_MODULE_NAME[0]=&quot;surface_laptop_se_buttons&quot;
 DEST_MODULE_LOCATION[0]=&quot;/updates/dkms&quot;
-MAKE[0]=&quot;make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build modules&quot;
-CLEAN=&quot;make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build clean&quot;
 AUTOINSTALL=&quot;yes&quot;</code></pre>
 </details>
 
