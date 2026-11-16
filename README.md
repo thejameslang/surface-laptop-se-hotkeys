@@ -27,13 +27,23 @@ The full investigation is written up in
 Needs kernel 6.11 or newer. It was tested on 7.1.5. Kernels 6.7–6.10 are
 covered by a compatibility fallback that hasn't been tested.
 
-1. Install DKMS and the headers for your running kernel:
+1. Install DKMS and the kernel headers:
 
    | Distro | Command |
    |---|---|
-   | Pop!_OS, Ubuntu, Mint, LMDE, Debian | `sudo apt install dkms linux-headers-$(uname -r)` |
-   | Fedora | `sudo dnf install dkms kernel-devel` |
+   | Debian, LMDE | `sudo apt install dkms linux-headers-amd64` |
+   | Ubuntu, Mint, Pop!_OS | `sudo apt install dkms linux-headers-generic` |
+   | Fedora | `sudo dnf install dkms kernel-devel-$(uname -r) kernel-devel` |
    | Arch | `sudo pacman -S dkms linux-headers` |
+
+   These packages follow your kernel, so each kernel update also installs
+   matching headers. DKMS needs those to rebuild the module for the new kernel.
+   Headers for only the running kernel (`linux-headers-$(uname -r)`) would
+   leave the next kernel without any, and the hotkeys would stop working after
+   the update. If you run a different kernel flavour (HWE, lowlatency, LTS and
+   so on), install the headers package for that flavour instead. On Fedora,
+   `kernel-devel-$(uname -r)` covers the kernel you're running now, and
+   `kernel-devel` covers the ones that follow.
 
 2. Clone this repo and run the installer:
 
@@ -49,15 +59,30 @@ installer also removes any older version it finds.
 ### With Secure Boot on
 
 The module has to be signed with a Machine Owner Key (MOK) that you enrol
-once. DKMS generates the key and signs the module. Enrol it with:
+once. DKMS generates the key and signs the module. If the module can't load
+because of Secure Boot, `install.sh` prints the right command for the key it
+finds and stops. Otherwise, enrol the key yourself:
 
 ```sh
 sudo mokutil --import /var/lib/shim-signed/mok/MOK.der   # Ubuntu, Pop!_OS, Mint (skip if the installer prompted you)
-sudo mokutil --import /var/lib/dkms/mok.pub              # Debian, LMDE
+sudo mokutil --import /var/lib/dkms/mok.pub              # Debian, LMDE, Fedora, Arch
 ```
 
 Reboot, choose **Enroll MOK → Continue → Yes** on the blue MOK Manager
 screen, and enter the password you set.
+
+- **Fedora:** `/var/lib/dkms/mok.pub` is DKMS's default key location, which
+  DKMS creates the first time it builds a module. I haven't tested this on
+  Fedora.
+- **Arch:** Arch doesn't set up Secure Boot signing for you, and most Arch
+  Secure Boot setups don't use shim, so there may be no MOK Manager to enrol
+  into. `/var/lib/dkms/mok.pub` is the key to enrol if you do use shim.
+  Otherwise, turn Secure Boot off, or point DKMS at a key your setup already
+  trusts with `mok_signing_key` and `mok_certificate` in
+  `/etc/dkms/framework.conf`. I haven't tested this on Arch.
+- **Kernel lockdown:** with Secure Boot on, the kernel locks down `/dev/mem`.
+  `tools/read-battery-protection.py` reads it, so it fails there. Turn Secure
+  Boot off to use it.
 
 ### Uninstall
 
