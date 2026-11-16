@@ -13,25 +13,24 @@ SRC="$(dirname "$(readlink -f "$0")")/dkms"
 V=$(sed -n 's/^PACKAGE_VERSION="\(.*\)"/\1/p' "$SRC/dkms.conf")
 KERNEL=$(uname -r)
 
-# Print the command that installs headers matching the kernel packages in use.
-# Ubuntu and Mint can run either the plain or the HWE kernel, and the headers
-# metapackage has to match (linux-image-generic-hwe-24.04 needs
-# linux-headers-generic-hwe-24.04).
+# Print the command that installs headers matching the kernel packages in use,
+# or nothing on a system without dpkg. Ubuntu and Mint can run either the plain
+# or the HWE kernel, and the headers metapackage has to match
+# (linux-image-generic-hwe-24.04 needs linux-headers-generic-hwe-24.04). The
+# metapackage only pulls in headers for the newest installed kernel, so the
+# running kernel's own headers are named too, in case it isn't the newest.
 headers_hint() {
 	local pkg=
-	if ! command -v dpkg-query >/dev/null; then
-		echo "see the README for your distro"
-		return
-	fi
+	command -v dpkg-query >/dev/null || return 0
 	# shellcheck disable=SC2016  # ${...} is dpkg-query's format, not ours
 	pkg=$(dpkg-query -W -f='${db:Status-Abbrev} ${Package}\n' 'linux-image-generic-hwe-*' 2>/dev/null |
 		awk '$1 == "ii" { print $2; exit }')
 	if [ -n "$pkg" ]; then
-		echo "sudo apt install linux-headers-${pkg#linux-image-}"
+		echo "sudo apt install linux-headers-$KERNEL linux-headers-${pkg#linux-image-}"
 	elif dpkg-query -W -f='${db:Status-Abbrev}\n' linux-image-generic 2>/dev/null | grep -q '^ii'; then
-		echo "sudo apt install linux-headers-generic"
+		echo "sudo apt install linux-headers-$KERNEL linux-headers-generic"
 	elif dpkg-query -W -f='${db:Status-Abbrev}\n' linux-image-amd64 2>/dev/null | grep -q '^ii'; then
-		echo "sudo apt install linux-headers-amd64"
+		echo "sudo apt install linux-headers-$KERNEL linux-headers-amd64"
 	else
 		echo "sudo apt install linux-headers-$KERNEL"
 	fi
@@ -44,7 +43,12 @@ command -v dkms >/dev/null || { echo "Install dkms and kernel headers first (see
 KBUILD="/lib/modules/$KERNEL/build"
 [ -d "$KBUILD" ] || {
 	echo "No kernel headers for the running kernel ($KERNEL): $KBUILD is missing."
-	echo "Install them with: $(headers_hint)"
+	hint=$(headers_hint)
+	if [ -n "$hint" ]; then
+		echo "Install them with: $hint"
+	else
+		echo "Install the kernel headers for your distro (see the README)."
+	fi
 	echo "Then run this again."
 	exit 1
 }
@@ -116,7 +120,7 @@ if [ "$rc" -ne 0 ]; then
 		# DKMS exits 77 when BUILD_EXCLUSIVE_KERNEL_MIN skips this kernel.
 		echo "Kernel $KERNEL is older than 6.7, which this driver doesn't support. Nothing was built."
 	elif [ -n "$others_installed" ]; then
-		echo "Build failed; your existing driver is still installed"
+		echo "Build failed; your existing driver is still installed."
 	elif [ "$same_registered" = 1 ] && [ "$v_was_installed" = 1 ]; then
 		echo "Build failed. Version $V had to be removed to rebuild it, so no driver is installed now."
 		echo "A module that is already loaded keeps working until you reboot."
@@ -134,10 +138,14 @@ done
 if ! dkms install -m $N -v "$V"; then
 	echo
 	echo "dkms install failed. No driver is installed now."
-	[ -n "$others" ] && echo "The older version(s) (${others# }) were already removed."
+	if [ -n "$others" ]; then
+		echo "The older version(s) (${others# }) were already removed."
+	fi
 	echo "A module that is already loaded keeps working until you reboot."
 	echo "To recover, fix the error above and run this again: sudo bash install.sh"
-	echo "(To go back to an earlier version, run install.sh from that version of this repo.)"
+	if [ -n "$others" ]; then
+		echo "(To go back to an earlier version, run install.sh from that version of this repo.)"
+	fi
 	exit 1
 fi
 rmmod $N 2>/dev/null || true
