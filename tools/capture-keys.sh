@@ -34,7 +34,13 @@ if [ -n "$missing" ]; then
 	read -r -p "Install with apt-get now? [y/N] " answer
 	case "$answer" in
 	[yY]*) apt-get install -y $missing ;;
-	*) echo "Not installing. Without evtest there is nothing to record."; command -v evtest >/dev/null || exit 1 ;;
+	*)
+		if ! command -v evtest >/dev/null; then
+			echo "Not installing. Without evtest there is nothing to record."
+			exit 1
+		fi
+		echo "Not installing acpid. Continuing without acpi_listen."
+		;;
 	esac
 fi
 
@@ -64,7 +70,9 @@ cleanup() {
 	[ -n "${SUDO_UID:-}" ] && [ -d "$OUT" ] && chown -R "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$OUT"
 }
 trap cleanup EXIT
-trap 'echo; echo ">>> Interrupted. Restoring debug settings."; exit 130' INT TERM
+# Exit with the usual 128 + signal number, so callers can tell what happened.
+trap 'echo; echo ">>> Interrupted. Restoring debug settings."; exit 130' INT
+trap 'echo; echo ">>> Terminated. Restoring debug settings."; exit 143' TERM
 
 if ! systemctl is-active --quiet acpid 2>/dev/null; then
 	systemctl start acpid 2>/dev/null && started_acpid=1
